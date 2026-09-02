@@ -19,6 +19,7 @@ var popolazione: int = Balance.POPOLAZIONE_INIZIALE
 var potere: Array[float] = [34.0, 33.0, 33.0]
 var deposta: int = -1                         # fazione ribelle, -1 se nessuna
 var fazione_giocatore: int = 0
+var senza_umano := false     # simulazione: l'IA guida tutte e tre le fazioni
 var livello_guardie: int = 0
 var addestramenti: int = 0
 

@@ -10,7 +10,7 @@ var _fra_mosse := 0.0
 func _process(delta: float) -> void:
 	if GameState.finita or GameState.fase != GameState.Fase.GIORNO:
 		return
-	if fazione == GameState.fazione_giocatore:
+	if not GameState.senza_umano and fazione == GameState.fazione_giocatore:
 		return
 	_fra_mosse -= delta
 	if _fra_mosse > 0.0:
