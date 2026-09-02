@@ -88,6 +88,8 @@ func _unhandled_input(evento: InputEvent) -> void:
 				scelta = g
 		for g in get_tree().get_nodes_in_group("guardia"):
 			g.selezionata = (g == scelta)
+		if scelta != null:
+			Audio.suona("selezione", -14.0)
 	elif evento.button_index == MOUSE_BUTTON_RIGHT:
 		for g in get_tree().get_nodes_in_group("guardia"):
 			if g.selezionata:
@@ -95,6 +97,7 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 ## La notte deve sembrare notte, non un giorno con piu' zombie.
 func _illumina(nuova: GameState.Fase) -> void:
+	Audio.suona("notte" if nuova == GameState.Fase.NOTTE else "alba", -4.0)
 	var colore := Color.WHITE if nuova == GameState.Fase.GIORNO else Color(0.44, 0.47, 0.58)
 	create_tween().tween_property(_luce, "color", colore, 2.5)
 

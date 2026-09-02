@@ -42,6 +42,9 @@ func _ready() -> void:
 	_testo.offset_top = 190
 	add_child(_testo)
 	_aggiorna()
+	# le panoramiche di debug devono saltare il menu
+	if "--shot" in OS.get_cmdline_user_args():
+		_avvia.call_deferred()   # cambiare scena dentro _ready non si puo' fare
 
 func _process(_d: float) -> void:
 	for f in 3:
@@ -49,9 +52,12 @@ func _process(_d: float) -> void:
 			_scelta = f
 			_aggiorna()
 	if Input.is_action_just_pressed("ui_accept"):
-		GameState.ripristina()
-		GameState.fazione_giocatore = _scelta
-		get_tree().change_scene_to_file("res://scenes/main.tscn")
+		_avvia()
+
+func _avvia() -> void:
+	GameState.ripristina()
+	GameState.fazione_giocatore = _scelta
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 func _aggiorna() -> void:
 	var righe := "Scegli chi vuoi essere:\n\n"
