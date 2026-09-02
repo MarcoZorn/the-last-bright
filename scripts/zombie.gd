@@ -1,16 +1,19 @@
 extends CharacterBody2D
 class_name Zombie
-## Non insegue il giocatore: punta al cuore della citta'. Se esiste un percorso
-## verso la piazza lo prende; se non esiste vuol dire che le barricate reggono,
-## quindi va a picchiare quella piu' vicina. Appena una cade, tutti gli altri
-## si accorgono da soli che c'e' una strada aperta: la pressione sulle difese
-## emerge dalla mappa, non da codice che la simula.
+## Non insegue il giocatore: punta all'edificio che gli e' stato assegnato.
+## Se esiste un percorso lo prende; se non esiste vuol dire che qualcosa lo
+## blocca, quindi va a picchiare la barricata piu' vicina. Appena una cade,
+## tutti gli altri si accorgono da soli che c'e' una strada aperta: l'assedio
+## emerge dalla mappa, non da codice che lo simula.
 
 var mondo: World
+var vita: float = Balance.ZOMBIE_VITA
+var edificio_bersaglio: Edificio
 
 var _percorso: PackedVector2Array
-var _bersaglio: Barricata
+var _barricata: Barricata
 var _fra_ricalcoli := 0.0
+var _spinta := Vector2.ZERO
 
 func _ready() -> void:
 	add_to_group("zombie")
@@ -24,9 +27,10 @@ func _physics_process(delta: float) -> void:
 		_fra_ricalcoli = Balance.PATH_REFRESH
 		_ripianifica()
 
-	if _bersaglio != null and _bersaglio.distanza(global_position) < Balance.TILE * 1.4:
+	var preda := _preda_a_portata()
+	if preda != null:
 		velocity = Vector2.ZERO
-		_bersaglio.danneggia(Balance.BARRICATA_DANNO * delta)
+		preda.subisci(_danno_contro(preda) * delta)
 	elif _percorso.size() > 1:
 		var passo := _percorso[1]
 		velocity = global_position.direction_to(passo) * Balance.ZOMBIE_SPEED
@@ -34,21 +38,40 @@ func _physics_process(delta: float) -> void:
 			_percorso.remove_at(0)
 	else:
 		velocity = Vector2.ZERO
+
+	velocity += _spinta
+	_spinta = _spinta.lerp(Vector2.ZERO, minf(delta * 8.0, 1.0))
 	move_and_slide()
 
-	if global_position.distance_to(mondo.piazza_centro()) < Balance.TILE * 3:
-		_dilaga()
+## Mordono qualunque cosa gli capiti a tiro: muri, guardie, leader, edifici.
+func _preda_a_portata() -> Node2D:
+	var migliore: Node2D = null
+	var d_min := Balance.TILE * 1.4
+	for n in get_tree().get_nodes_in_group("danneggiabile"):
+		if not n.attaccabile():
+			continue
+		var d: float = n.distanza(global_position)
+		if d < d_min:
+			d_min = d
+			migliore = n
+	return migliore
+
+func _danno_contro(preda: Node2D) -> float:
+	return Balance.ZOMBIE_DANNO if preda is Player or preda is Guardia else Balance.BARRICATA_DANNO
 
 func _ripianifica() -> void:
 	# ponytail: A* completo ogni 0.6s per zombie. Oltre ~150 zombie conviene un
-	# flow-field unico condiviso, visto che l'obiettivo e' lo stesso per tutti.
-	_percorso = mondo.percorso(global_position, mondo.piazza_centro())
+	# flow-field unico condiviso, visto che gli obiettivi sono solo tre.
+	var meta: Vector2 = mondo.piazza_centro()
+	if edificio_bersaglio != null and edificio_bersaglio.in_piedi:
+		meta = edificio_bersaglio.punto_approccio(global_position)
+	_percorso = mondo.percorso(global_position, meta)
 	if not _percorso.is_empty():
-		_bersaglio = null
+		_barricata = null
 		return
-	_bersaglio = _barricata_piu_vicina()
-	if _bersaglio != null:
-		_percorso = mondo.percorso(global_position, _bersaglio.punto_approccio(global_position))
+	_barricata = _barricata_piu_vicina()
+	if _barricata != null:
+		_percorso = mondo.percorso(global_position, _barricata.punto_approccio(global_position))
 
 func _barricata_piu_vicina() -> Barricata:
 	var migliore: Barricata = null
@@ -62,6 +85,23 @@ func _barricata_piu_vicina() -> Barricata:
 			migliore = b
 	return migliore
 
-func _dilaga() -> void:
-	GameState.perdi_abitanti(Balance.ABITANTI_PERSI_PER_ZOMBIE)
-	queue_free()
+func subisci(danno: float, spinta := Vector2.ZERO) -> void:
+	if vita <= 0.0:
+		return
+	vita -= danno
+	_spinta = spinta.normalized() * Balance.SPINTA_COLPO
+	DannoFluttuante.mostra(get_parent(), global_position, str(ceili(danno)), Color(1, 0.9, 0.5))
+	modulate = Color(1.0, 0.45, 0.45)
+	create_tween().tween_property(self, "modulate", Color(0.65, 1.0, 0.6), 0.15)
+	if vita <= 0.0:
+		_muori()
+
+func _muori() -> void:
+	GameState.zombie_uccisi += 1
+	remove_from_group("zombie")
+	set_physics_process(false)
+	var t := create_tween()
+	t.set_parallel()
+	t.tween_property(self, "scale", Vector2(0.2, 0.2), 0.18)
+	t.tween_property(self, "modulate:a", 0.0, 0.18)
+	t.chain().tween_callback(queue_free)
