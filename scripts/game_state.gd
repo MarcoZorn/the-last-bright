@@ -60,7 +60,6 @@ func cambia_fase(nuova: Fase) -> void:
 ## il potere in base a chi ha effettivamente tenuto in piedi la baracca.
 func _alba() -> void:
 	denaro += popolazione * Balance.TASSE_PER_ABITANTE * (morale * Balance.TASSE_PESO_MORALE)
-	_paga_stipendi()
 
 	var mangiato := popolazione * Balance.VIVERI_PER_ABITANTE
 	if viveri >= mangiato:
@@ -79,27 +78,10 @@ func _alba() -> void:
 		vinta = true
 
 ## Chi produce risultati guadagna consenso, e lo toglie agli altri.
-## Le guardie vanno pagate ogni alba. Chi non le paga se le vede andare via,
-## e la citta' se ne accorge.
-func _paga_stipendi() -> void:
-	var guarnigione := get_tree().get_nodes_in_group("guardia")
-	if guarnigione.is_empty():
-		return
-	var conto: float = guarnigione.size() * Balance.GUARDIA_STIPENDIO
-	if denaro >= conto:
-		denaro -= conto
-		return
-	# paghi quelle che puoi permetterti, le altre se ne vanno stanotte
-	var pagabili := int(denaro / Balance.GUARDIA_STIPENDIO)
-	denaro -= pagabili * Balance.GUARDIA_STIPENDIO
-	var disertori := guarnigione.size() - pagabili
-	for i in disertori:
-		guarnigione[i].queue_free()
-	morale = maxf(morale - Balance.DISERZIONE_MORALE, 0.0)
-	annuncio.emit("%d guardie hanno disertato: non erano pagate" % disertori, Color(1, 0.5, 0.4))
+## Quanto entrera' alla prossima alba, con i numeri di adesso.
+func gettito_atteso() -> float:
+	return popolazione * Balance.TASSE_PER_ABITANTE * (morale * Balance.TASSE_PESO_MORALE)
 
-func stipendi_dovuti() -> float:
-	return get_tree().get_nodes_in_group("guardia").size() * Balance.GUARDIA_STIPENDIO
 
 func _ridistribuisci_potere() -> void:
 	potere[0] += (morale - 50.0) * Balance.POTERE_SPINTA_MORALE
@@ -149,6 +131,26 @@ func perdi_abitanti(quanti: int) -> void:
 		finita = true
 	cambiato.emit()
 
+## Rimette tutto come all'inizio: l'autoload sopravvive al cambio scena, quindi
+## senza questo la seconda partita partirebbe con lo stato della prima.
+func ripristina() -> void:
+	morale = Balance.MORALE_INIZIALE
+	denaro = Balance.DENARO_INIZIALE
+	viveri = Balance.VIVERI_INIZIALI
+	sicurezza = 100.0
+	popolazione = Balance.POPOLAZIONE_INIZIALE
+	potere = [34.0, 33.0, 33.0]
+	deposta = -1
+	livello_guardie = 0
+	addestramenti = 0
+	fase = Fase.GIORNO
+	giorno = 1
+	tempo_fase = 0.0
+	zombie_uccisi = 0
+	finita = false
+	vinta = false
+	Spedizione.in_corso = 0
+
 func _registra_tasti() -> void:
 	var movimento := {"ui_up": KEY_W, "ui_down": KEY_S, "ui_left": KEY_A, "ui_right": KEY_D}
 	for azione in movimento:
@@ -157,7 +159,8 @@ func _registra_tasti() -> void:
 		InputMap.action_add_event(azione, ev)
 	var extra := {"ripara": KEY_E, "costruisci": KEY_Q, "attacca": KEY_SPACE,
 		"azione_1": KEY_1, "azione_2": KEY_2, "azione_3": KEY_3, "azione_4": KEY_4, "azione_5": KEY_5, "azione_6": KEY_6,
-		"fazione_1": KEY_F1, "fazione_2": KEY_F2, "fazione_3": KEY_F3}
+		"fazione_1": KEY_F1, "fazione_2": KEY_F2, "fazione_3": KEY_F3,
+		"ricomincia": KEY_R, "manuale": KEY_H}
 	for nome in extra:
 		if not InputMap.has_action(nome):
 			InputMap.add_action(nome)

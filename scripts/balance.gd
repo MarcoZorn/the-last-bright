@@ -37,7 +37,8 @@ const ZOMBIE_VITA := 3.0
 const ZOMBIE_VITA_PER_GIORNO := 1.2
 const ZOMBIE_SPEED := 26.0
 const ZOMBIE_SPEED_PER_GIORNO := 0.9
-const ZOMBIE_DANNO := 22.0
+const ZOMBIE_DANNO := 22.0              # addosso al leader
+const ZOMBIE_DANNO_GUARDIA := 9.0       # addosso a una guardia: deve avere il tempo di sparare
 const ZOMBIE_DANNO_PER_GIORNO := 1.5
 const MORSO_MURA_PER_GIORNO := 0.15   # quanto piu' in fretta rodono le barricate
 
@@ -55,19 +56,15 @@ const RIPARA_QUANTITA := 40.0
 const RIPARA_COSTO := 8.0
 
 # --- guardie: partono da recluta scarsa, si migliorano a pagamento ---
-## Non si comprano una volta e basta: ogni alba vanno pagate. Una guarnigione
-## grossa e' un impegno permanente sulle casse, non un acquisto.
-const GUARDIA_COSTO := 35.0             # reclutamento, una tantum
-const GUARDIA_STIPENDIO := 7.0          # ogni alba, per ogni guardia in servizio
-const GUARDIA_LIQUIDAZIONE := 20.0      # quanto rientra licenziandone una
-const DISERZIONE_MORALE := 6.0          # se non paghi, se ne vanno e si sa in giro
+const GUARDIA_COSTO := 35.0             # reclutamento
+const GUARDIA_LIQUIDAZIONE := 20.0      # quanto rientra congedandone una
 const GUARDIA_VELOCITA := 68.0
 const PROIETTILE_VELOCITA := 240.0
 const GUARDIA_LIVELLO_MAX := 3
 const GUARDIA_ADDESTRAMENTO_COSTO := 70.0   # per il primo livello, poi raddoppia
 ## livello 0 = recluta con un fucile scassato. Ogni livello e' una scelta di
 ## bilancio dell'Esercito, non un regalo.
-const GUARDIA_VITA := [40.0, 60.0, 85.0, 120.0]
+const GUARDIA_VITA := [55.0, 80.0, 110.0, 150.0]
 const GUARDIA_RAGGIO := [58.0, 70.0, 82.0, 96.0]
 const GUARDIA_CADENZA := [1.6, 1.25, 0.95, 0.7]
 const PROIETTILE_DANNO := [0.8, 1.2, 1.7, 2.4]
@@ -78,7 +75,7 @@ const EDIFICIO_CADUTO_MORALE := 30.0
 const EDIFICIO_CADUTO_ABITANTI := 20
 
 # --- economia dell'alba ---
-const TASSE_PER_ABITANTE := 0.30
+const TASSE_PER_ABITANTE := 0.60
 const TASSE_PESO_MORALE := 0.01
 const VIVERI_PER_ABITANTE := 0.35   # quanto mangia la citta' ogni giorno
 const FAME_MORALE := 12.0           # morale perso quando i viveri finiscono
@@ -132,7 +129,7 @@ const AZIONI := [
 		"desc": "Migliora tutte le guardie di un livello. Costa sempre di piu'"},
 	{"id": "licenzia", "fazione": 2, "nome": "Licenzia", "ricarica": 3.0,
 		"effetti": {}, "speciale": "licenzia",
-		"desc": "Congedi la guardia selezionata: recuperi 20$ e uno stipendio in meno"},
+		"desc": "Congedi la guardia selezionata e recuperi 20$"},
 	{"id": "leva", "fazione": 2, "nome": "Leva", "ricarica": 26.0,
 		"effetti": {"denaro": -35.0, "morale": -4.0}, "speciale": "leva",
 		"desc": "Due guardie subito, arruolate a forza"},
@@ -163,6 +160,9 @@ static func zombie_velocita(giorno: int) -> float:
 
 static func zombie_danno(giorno: int) -> float:
 	return ZOMBIE_DANNO + ZOMBIE_DANNO_PER_GIORNO * (giorno - 1)
+
+static func zombie_danno_guardia(giorno: int) -> float:
+	return ZOMBIE_DANNO_GUARDIA + ZOMBIE_DANNO_PER_GIORNO * (giorno - 1)
 
 static func morso_mura(giorno: int) -> float:
 	return BARRICATA_DANNO + MORSO_MURA_PER_GIORNO * (giorno - 1)
