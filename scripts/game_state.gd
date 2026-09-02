@@ -64,9 +64,11 @@ func _registra_wasd() -> void:
 		var ev := InputEventKey.new()
 		ev.physical_keycode = mappa[azione]
 		InputMap.action_add_event(azione, ev)
-	for nome in {"ripara": KEY_E, "costruisci": KEY_Q}:
+	var azioni := {"ripara": KEY_E, "costruisci": KEY_Q, "attacca": KEY_SPACE}
+	for nome in azioni:
 		if not InputMap.has_action(nome):
 			InputMap.add_action(nome)
 		var ev2 := InputEventKey.new()
-		ev2.physical_keycode = {"ripara": KEY_E, "costruisci": KEY_Q}[nome]
+		ev2.physical_keycode = azioni[nome]
 		InputMap.action_add_event(nome, ev2)
+	# il mouse resta libero per selezionare e comandare le guardie
