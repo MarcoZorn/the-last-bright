@@ -8,6 +8,7 @@ var mondo: World
 var celle: Array[Vector2i] = []
 var vita: float = Balance.BARRICATA_VITA
 var in_piedi := true
+var sotto_attacco := 0.0   # secondi da cui sta prendendo colpi: lo legge l'HUD
 
 var _corpo: StaticBody2D
 var _barra: BarraVita
@@ -36,6 +37,16 @@ func _crea_barra() -> void:
 func attaccabile() -> bool:
 	return in_piedi
 
+func _process(d: float) -> void:
+	sotto_attacco = maxf(sotto_attacco - d, 0.0)
+
+## Punto medio del varco: lo usa l'HUD per la freccia di allarme.
+func centro_varco() -> Vector2:
+	var c := Vector2.ZERO
+	for cella in celle:
+		c += mondo.centro(cella)
+	return c / celle.size()
+
 ## Dove deve arrivare uno zombie per poterla picchiare.
 func punto_approccio(da: Vector2) -> Vector2:
 	var migliore := da
@@ -56,6 +67,7 @@ func distanza(p: Vector2) -> float:
 func subisci(quanto: float, _spinta := Vector2.ZERO) -> void:
 	if not in_piedi:
 		return
+	sotto_attacco = 2.0
 	vita -= quanto
 	_barra.aggiorna(vita / Balance.BARRICATA_VITA)
 	if vita <= 0.0:

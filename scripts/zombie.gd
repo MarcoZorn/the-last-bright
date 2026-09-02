@@ -7,7 +7,9 @@ class_name Zombie
 ## emerge dalla mappa, non da codice che lo simula.
 
 var mondo: World
-var vita: float = Balance.ZOMBIE_VITA
+var vita: float
+var vita_max: float
+var velocita: float
 var edificio_bersaglio: Edificio
 
 var _percorso: PackedVector2Array
@@ -15,9 +17,18 @@ var _barricata: Barricata
 var _fra_ricalcoli := 0.0
 var _spinta := Vector2.ZERO
 
+var _barra: BarraVita
+
 func _ready() -> void:
 	add_to_group("zombie")
 	_fra_ricalcoli = randf() * Balance.PATH_REFRESH  # sfasa il costo su piu' frame
+	# ogni notte quelli che arrivano sono piu' duri di quelli di ieri
+	vita_max = Balance.zombie_vita(GameState.giorno)
+	vita = vita_max
+	velocita = Balance.zombie_velocita(GameState.giorno)
+	_barra = BarraVita.new(12.0, 10.0)
+	add_child(_barra)
+	_barra.visible = false
 
 func _physics_process(delta: float) -> void:
 	if mondo == null:
@@ -33,7 +44,7 @@ func _physics_process(delta: float) -> void:
 		preda.subisci(_danno_contro(preda) * delta)
 	elif _percorso.size() > 1:
 		var passo := _percorso[1]
-		velocity = global_position.direction_to(passo) * Balance.ZOMBIE_SPEED
+		velocity = global_position.direction_to(passo) * velocita
 		if global_position.distance_to(passo) < 3.0:
 			_percorso.remove_at(0)
 	else:
@@ -57,7 +68,9 @@ func _preda_a_portata() -> Node2D:
 	return migliore
 
 func _danno_contro(preda: Node2D) -> float:
-	return Balance.ZOMBIE_DANNO if preda is Player or preda is Guardia else Balance.BARRICATA_DANNO
+	if preda is Player or preda is Guardia:
+		return Balance.zombie_danno(GameState.giorno)
+	return Balance.morso_mura(GameState.giorno)
 
 func _ripianifica() -> void:
 	# ponytail: A* completo ogni 0.6s per zombie. Oltre ~150 zombie conviene un
@@ -89,6 +102,8 @@ func subisci(danno: float, spinta := Vector2.ZERO) -> void:
 	if vita <= 0.0:
 		return
 	vita -= danno
+	_barra.visible = true
+	_barra.aggiorna(vita / vita_max)
 	_spinta = spinta.normalized() * Balance.SPINTA_COLPO
 	DannoFluttuante.mostra(get_parent(), global_position, str(ceili(danno)), Color(1, 0.9, 0.5))
 	modulate = Color(1.0, 0.45, 0.45)
