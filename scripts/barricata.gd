@@ -99,6 +99,9 @@ func _chiudi() -> void:
 		_corpo.add_child(cs)
 
 func _apri() -> void:
+	GameState.annuncio.emit("UN VARCO E' CADUTO", Color(1, 0.35, 0.3))
+	var cam := get_viewport().get_camera_2d()
+	Grafica.scossa(cam, 6.0)
 	for c in celle:
 		mondo.imposta_solido(c, false)
 		mondo.dipingi_cella(c, ",")

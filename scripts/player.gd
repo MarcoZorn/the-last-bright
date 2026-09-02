@@ -18,12 +18,14 @@ var a_terra := false
 var _direzione := Vector2.DOWN
 var _cooldown := 0.0
 var _rialzo := 0.0
+var _tempo := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
 	add_to_group("danneggiabile")
 	var c: Vector2i = SPRITE_FAZIONE[fazione]
 	$Sprite2D.region_rect = Rect2(c.x * Balance.TILE, c.y * Balance.TILE, Balance.TILE, Balance.TILE)
+	Grafica.ombra(self, 5.0)
 
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
@@ -76,6 +78,7 @@ func _attacca() -> void:
 		if _direzione.normalized().dot(global_position.direction_to(z.global_position)) < 0.15:
 			continue
 		z.subisci(Balance.ATTACCO_DANNO, global_position.direction_to(z.global_position))
+		Grafica.schizzo(get_parent(), z.global_position, Color(0.5, 0.9, 0.4), 4)
 
 func attaccabile() -> bool:
 	return not a_terra

@@ -17,6 +17,8 @@ var _cooldown := 0.0
 var _barra: BarraVita
 var _anello := Line2D.new()
 var _livello_visto := -1
+var _sprite: Sprite2D
+var _tempo := 0.0
 
 func _ready() -> void:
 	add_to_group("guardia")
@@ -24,7 +26,8 @@ func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 1
 
-	var s := Sprite2D.new()
+	_sprite = Sprite2D.new()
+	var s := _sprite
 	s.texture = load("res://assets/kenney/tiny-dungeon/Tilemap/tilemap_packed.png")
 	s.region_enabled = true
 	s.region_rect = Rect2(0, 128, Balance.TILE, Balance.TILE)  # cavaliere
@@ -43,6 +46,7 @@ func _ready() -> void:
 	_anello.visible = false
 	add_child(_anello)
 
+	Grafica.ombra(self, 5.0)
 	_barra = BarraVita.new(20.0, 12.0)
 	add_child(_barra)
 	vita = vita_max()
@@ -66,6 +70,7 @@ func subisci(danno: float, _spinta := Vector2.ZERO) -> void:
 	vita -= danno
 	_barra.aggiorna(vita / vita_max())
 	if vita <= 0.0:
+		Grafica.schizzo(get_parent(), global_position, Color(0.9, 0.3, 0.3), 9)
 		queue_free()
 
 func _physics_process(delta: float) -> void:
@@ -84,6 +89,8 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		_percorso.clear()
 	move_and_slide()
+	_tempo += delta
+	Grafica.passo(_sprite, velocity, _tempo)
 
 	_cooldown -= delta
 	if _cooldown > 0.0:

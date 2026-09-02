@@ -16,6 +16,7 @@ var _percorso: PackedVector2Array
 var _barricata: Barricata
 var _fra_ricalcoli := 0.0
 var _spinta := Vector2.ZERO
+var _tempo := 0.0
 
 var _barra: BarraVita
 
@@ -26,6 +27,12 @@ func _ready() -> void:
 	vita_max = Balance.zombie_vita(GameState.giorno)
 	vita = vita_max
 	velocita = Balance.zombie_velocita(GameState.giorno)
+	Grafica.ombra(self, 4.5)
+	# ogni zombie e' un po' diverso dagli altri: senza, l'ondata sembra un plotone
+	var sprite: Sprite2D = $Sprite2D
+	sprite.modulate = Color(randf_range(0.5, 0.75), randf_range(0.85, 1.0), randf_range(0.5, 0.7))
+	scale = Vector2.ONE * randf_range(0.88, 1.12)
+	velocita *= randf_range(0.9, 1.1)
 	_barra = BarraVita.new(12.0, 10.0)
 	add_child(_barra)
 	_barra.visible = false
@@ -53,6 +60,8 @@ func _physics_process(delta: float) -> void:
 	velocity += _spinta
 	_spinta = _spinta.lerp(Vector2.ZERO, minf(delta * 8.0, 1.0))
 	move_and_slide()
+	_tempo += delta
+	Grafica.passo($Sprite2D, velocity, _tempo)
 
 ## Mordono qualunque cosa gli capiti a tiro: muri, guardie, leader, edifici.
 func _preda_a_portata() -> Node2D:
@@ -68,8 +77,10 @@ func _preda_a_portata() -> Node2D:
 	return migliore
 
 func _danno_contro(preda: Node2D) -> float:
-	if preda is Player or preda is Guardia:
+	if preda is Player:
 		return Balance.zombie_danno(GameState.giorno)
+	if preda is Guardia:
+		return Balance.zombie_danno_guardia(GameState.giorno)
 	return Balance.morso_mura(GameState.giorno)
 
 func _ripianifica() -> void:
@@ -106,13 +117,15 @@ func subisci(danno: float, spinta := Vector2.ZERO) -> void:
 	_barra.aggiorna(vita / vita_max)
 	_spinta = spinta.normalized() * Balance.SPINTA_COLPO
 	DannoFluttuante.mostra(get_parent(), global_position, str(ceili(danno)), Color(1, 0.9, 0.5))
-	modulate = Color(1.0, 0.45, 0.45)
-	create_tween().tween_property(self, "modulate", Color(0.65, 1.0, 0.6), 0.15)
+	var tinta: Color = $Sprite2D.modulate
+	$Sprite2D.modulate = Color(1.0, 0.45, 0.45)
+	create_tween().tween_property($Sprite2D, "modulate", tinta, 0.15)
 	if vita <= 0.0:
 		_muori()
 
 func _muori() -> void:
 	GameState.zombie_uccisi += 1
+	Grafica.schizzo(get_parent(), global_position, Color(0.45, 0.8, 0.35), 8)
 	remove_from_group("zombie")
 	set_physics_process(false)
 	var t := create_tween()
