@@ -40,11 +40,10 @@ fuori al posto suo.
 Vinci se reggi 10 giorni. Perdi se la popolazione arriva a zero o se crollano
 tutti e tre gli edifici.
 
-Le guardie **non si comprano una volta e basta**: costano 35$ per reclutarle e
-poi 7$ ciascuna ogni alba. Se all'alba le casse non bastano, quelle che non puoi
-pagare disertano e il morale ne risente. Puoi congedarne una col tasto 4
-dell'Esercito e recuperare 20$ -- e uno stipendio in meno da pagare. Una
-guarnigione grossa e' un impegno permanente, non un acquisto.
+Una guardia costa 35$ e l'addestramento raddoppia di prezzo a ogni livello, quindi
+poche guardie forti e tante guardie scarse sono due strategie diverse. Se una non
+ti serve piu' la congedi (azione 4 dell'Esercito) e recuperi 20$. Il gettito
+dell'alba dipende dal morale: una citta' demoralizzata e' anche una citta' povera.
 
 Il tuo leader non e' un soldato: il fendente serve a toglierti dai guai. Per
 reggere un'ondata servono le guardie, che partono scarse e migliorano solo se
@@ -84,7 +83,6 @@ Dopo aver modificato la mappa:
 python3 tools/check_map.py                                  # non hai murato un varco?
 godot --headless --script res://tools/test_assedio.gd       # l'assedio funziona ancora?
 godot --headless --script res://tools/test_potere.gd        # il golpe scatta ancora?
-godot --headless --script res://tools/test_stipendi.gd      # i conti dell'esercito tornano?
 godot --headless --resolution 1280x720 -- --shot --notte    # panoramica in /tmp/lastbright_shot.png
 ```
 

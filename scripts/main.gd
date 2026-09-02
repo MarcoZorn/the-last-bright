@@ -100,6 +100,12 @@ func _illumina(nuova: GameState.Fase) -> void:
 
 func _process(delta: float) -> void:
 	if GameState.finita:
+		if Input.is_action_just_pressed("ricomincia"):
+			GameState.ripristina()
+			get_tree().reload_current_scene()
+		elif Input.is_action_just_pressed("ui_cancel"):
+			GameState.ripristina()
+			get_tree().change_scene_to_file("res://scenes/menu.tscn")
 		return
 	GameState.tempo_fase += delta
 	_aggiorna_sicurezza()

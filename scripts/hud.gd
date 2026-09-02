@@ -9,6 +9,7 @@ var _vita := ColorRect.new()
 var _barra_azioni := HBoxContainer.new()
 var _fazione_mostrata := -99
 var _annuncio := Label.new()
+var _manuale := PanelContainer.new()
 
 func _ready() -> void:
 	var telaio := Control.new()
@@ -70,10 +71,58 @@ func _ready() -> void:
 	_barra_azioni.add_theme_constant_override("separation", 6)
 	centro_basso.add_child(_barra_azioni)
 
+	_costruisci_manuale()
+	telaio.add_child(_manuale)
+
 	telaio.add_child(Frecce.new())
 
 	GameState.fase_cambiata.connect(_annuncia_fase)
 	GameState.annuncio.connect(_annuncia)
+
+## Manuale richiamabile con H: chi prova il gioco per la prima volta non ha
+## voglia di aprire un file di testo.
+func _costruisci_manuale() -> void:
+	_manuale.set_anchors_preset(Control.PRESET_CENTER)
+	_manuale.position = Vector2(150, 60)
+	_manuale.visible = false
+	var t := Label.new()
+	t.add_theme_font_size_override("font_size", 13)
+	t.text = """  COME SI GIOCA                                    (H per chiudere)
+
+  Governi una citta'-stato assediata insieme ad altre due fazioni.
+  Di giorno decidi, di notte reggi. Reggi 10 giorni e hai vinto.
+
+  MUOVERSI      WASD          SPAZIO fendente frontale
+  MURA          E ripara la barricata piu' vicina
+  GUARDIE       Q recluta   click sx seleziona   click dx mandala li'
+  FAZIONE       1-6 le tue azioni     F1/F2/F3 cambi fazione (per provare)
+
+  IL POTERE E' A SOMMA ZERO
+  Chiesa, Governo ed Esercito si dividono 100 punti di legittimita'.
+  All'alba chi ha prodotto risultati ne guadagna e li toglie agli altri:
+  morale alto premia la Chiesa, casse piene il Governo, mura intatte
+  l'Esercito. Chi scende sotto 12 viene DEPOSTO -- ma non e' eliminato:
+  passa a giocare da ribelle, con azioni sue per riprendersi il consenso.
+  Sopra 36 torna al potere, e ne butta fuori un altro al suo posto.
+
+  I SOLDI FINISCONO
+  Una guardia costa 35$, e l'addestramento raddoppia di prezzo a ogni
+  livello. Il gettito dell'alba dipende dal morale, quindi una citta'
+  demoralizzata e' anche una citta' povera. Se una guardia non ti serve
+  piu' puoi congedarla (azione 4 dell'Esercito) e recuperare 20$.
+
+  I VIVERI FINISCONO
+  La citta' mangia ogni giorno. Se restate a zero la gente muore di fame.
+  L'unico modo di farne entrare e' la SPEDIZIONE, che il 28% delle volte
+  non torna.
+
+  L'ASSEDIO
+  Gli zombie non ti inseguono: puntano ai tre edifici. Finche' le barricate
+  reggono non c'e' strada, quindi le sfondano. Appena una cede, tutti gli
+  altri trovano il varco. Le frecce rosse ai bordi dello schermo ti dicono
+  quale sta cedendo. I primi giorni arrivano solo dal ponte a nord; dal
+  giorno 5 anche dai fianchi, dal 10 sei circondato."""
+	_manuale.add_child(t)
 
 func _process(_d: float) -> void:
 	_aggiorna_stato()
@@ -85,8 +134,12 @@ func _process(_d: float) -> void:
 		_vita.size.x = 178.0 * quota
 		_vita.color = Color(1.0 - quota * 0.8, 0.2 + 0.6 * quota, 0.25)
 	if GameState.finita:
-		_banner.text = "HAI RETTO %d GIORNI" % Balance.GIORNI_PER_VINCERE if GameState.vinta else "LA CITTA' E' CADUTA"
+		var esito := "HAI RETTO %d GIORNI" % Balance.GIORNI_PER_VINCERE if GameState.vinta else "LA CITTA' E' CADUTA"
+		_banner.text = "%s\n\nR per ricominciare     ESC per il menu" % esito
+		_banner.add_theme_font_size_override("font_size", 34)
 		_banner.modulate.a = 0.95
+	if Input.is_action_just_pressed("manuale"):
+		_manuale.visible = not _manuale.visible
 
 func _aggiorna_stato() -> void:
 	var nome_fase := "GIORNO" if GameState.fase == GameState.Fase.GIORNO else "NOTTE"
@@ -103,7 +156,7 @@ func _aggiorna_stato() -> void:
 		+ "  Popolazione   %5d\n" % GameState.popolazione
 		+ "  Zombie uccisi %5d\n" % GameState.zombie_uccisi
 		+ "  Guardie liv.  %5d\n" % GameState.livello_guardie
-		+ "  Stipendi/alba %5.0f\n" % GameState.stipendi_dovuti()
+		+ "  Gettito/alba  %5.0f\n" % GameState.gettito_atteso()
 		+ ("  Spedizioni in corso %d\n" % Spedizione.in_corso if Spedizione.in_corso > 0 else ""))
 
 func _aggiorna_potere() -> void:
