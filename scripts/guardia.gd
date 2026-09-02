@@ -108,6 +108,7 @@ func _physics_process(delta: float) -> void:
 	if preda == null:
 		return
 	_cooldown = Balance.GUARDIA_CADENZA[GameState.livello_guardie]
+	Audio.suona("sparo", -20.0)
 	var p := Proiettile.new()
 	p.bersaglio = preda
 	p.danno = Balance.PROIETTILE_DANNO[GameState.livello_guardie]

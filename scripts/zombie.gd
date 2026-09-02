@@ -53,6 +53,8 @@ func _physics_process(delta: float) -> void:
 	if preda != null:
 		velocity = Vector2.ZERO
 		preda.subisci(_danno_contro(preda) * delta)
+		if not (preda is Player or preda is Guardia):
+			Audio.suona("morso_mura", -18.0)
 	elif _percorso.size() > 1:
 		var passo := _percorso[1]
 		velocity = global_position.direction_to(passo) * velocita
@@ -154,6 +156,7 @@ func brucia() -> void:
 func _muori() -> void:
 	GameState.zombie_uccisi += 1
 	Grafica.schizzo(get_parent(), global_position, Color(0.45, 0.8, 0.35), 8)
+	Audio.suona("morte", -12.0)
 	remove_from_group("zombie")
 	set_physics_process(false)
 	var t := create_tween()

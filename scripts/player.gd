@@ -72,6 +72,7 @@ func _scorciatoie() -> void:
 func _attacca() -> void:
 	_cooldown = Balance.ATTACCO_CADENZA
 	_mostra_fendente()
+	Audio.suona("fendente", -14.0)
 	for z in get_tree().get_nodes_in_group("zombie"):
 		if global_position.distance_to(z.global_position) > Balance.ATTACCO_RAGGIO:
 			continue
@@ -79,6 +80,7 @@ func _attacca() -> void:
 			continue
 		z.subisci(Balance.ATTACCO_DANNO, global_position.direction_to(z.global_position))
 		Grafica.schizzo(get_parent(), z.global_position, Color(0.5, 0.9, 0.4), 4)
+		Audio.suona("colpo", -10.0)
 
 func attaccabile() -> bool:
 	return not a_terra
@@ -128,6 +130,7 @@ func _ripara() -> void:
 	for b in get_tree().get_nodes_in_group("barricata"):
 		if b.distanza(global_position) < PORTATA_RIPARAZIONE and b.vita < Balance.BARRICATA_VITA:
 			b.ripara(Balance.RIPARA_QUANTITA)
+			Audio.suona("riparazione", -8.0)
 			GameState.modifica("denaro", -Balance.RIPARA_COSTO)
 			return
 
@@ -140,4 +143,5 @@ func _costruisci() -> void:
 	g.mondo = mondo
 	g.global_position = mondo.centro(mondo.a_cella(global_position))
 	guardie.add_child(g)
+	Audio.suona("monete", -8.0)
 	GameState.modifica("denaro", -Balance.GUARDIA_COSTO)

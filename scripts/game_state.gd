@@ -112,6 +112,7 @@ func _controlla_golpe() -> void:
 			if potere[f] < Balance.POTERE_SOGLIA_GOLPE:
 				deposta = f
 				var chi := "SEI STATO DEPOSTO" if f == fazione_giocatore else "%s E' STATA DEPOSTA" % NOMI[f]
+				Audio.suona("golpe", 0.0)
 				annuncio.emit(chi, Color(1, 0.4, 0.4))
 				return
 	elif potere[deposta] >= Balance.POTERE_SOGLIA_RITORNO:

@@ -47,6 +47,7 @@ func eseguibile(id: String) -> bool:
 
 func esegui(id: String) -> bool:
 	if not eseguibile(id):
+		Audio.suona("negato", -12.0)
 		return false
 	var a := _trova(id)
 	_ricarica[id] = a["ricarica"]
@@ -54,6 +55,7 @@ func esegui(id: String) -> bool:
 		GameState.modifica(campo, a["effetti"][campo])
 	if a.has("speciale"):
 		_speciale(a["speciale"])
+	Audio.suona("azione", -10.0)
 	GameState.cambiato.emit()
 	return true
 
@@ -108,6 +110,7 @@ func _speciale(nome: String) -> void:
 			GameState.modifica("denaro", -40.0)
 			GameState.sposta_potere(1, GameState.deposta, 5.0)
 		"spedizione":
+			Audio.suona("porta", -8.0)
 			var s := Spedizione.new()
 			add_child(s)
 
