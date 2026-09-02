@@ -47,6 +47,22 @@ func _physics_process(delta: float) -> void:
 		_ripara()
 	if Input.is_action_just_pressed("costruisci"):
 		_costruisci()
+	_scorciatoie()
+
+## 1-4 lanciano le azioni della tua fazione, F1-F3 cambiano fazione (serve solo
+## a provare il gioco da soli: col multiplayer sparisce).
+func _scorciatoie() -> void:
+	var azioni := Azioni.istanza.per_fazione(GameState.fazione_effettiva())
+	for i in mini(azioni.size(), 4):
+		if Input.is_action_just_pressed("azione_%d" % (i + 1)):
+			Azioni.istanza.esegui(azioni[i]["id"])
+	for f in 3:
+		if Input.is_action_just_pressed("fazione_%d" % (f + 1)):
+			GameState.fazione_giocatore = f
+			fazione = f
+			var c: Vector2i = SPRITE_FAZIONE[f]
+			$Sprite2D.region_rect = Rect2(c.x * Balance.TILE, c.y * Balance.TILE, Balance.TILE, Balance.TILE)
+			GameState.annuncio.emit("Ora giochi: %s" % GameState.NOMI[GameState.fazione_effettiva()], Color(0.8, 0.9, 1))
 
 ## Fendente frontale: colpisce tutto quello che hai davanti entro il raggio.
 ## Un leader non e' un soldato -- serve a toglierti dai guai, non a reggere

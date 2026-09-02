@@ -1,6 +1,6 @@
 extends Node2D
 ## Monta la scena e guida il ciclo giorno/notte.
-## Giorno: ripari, costruisci, incassi. Notte: arrivano e devi reggere.
+## Giorno: incassi, ripari, recluti, complotti. Notte: reggi.
 
 const PLAYER := preload("res://scenes/player.tscn")
 const ZOMBIE := preload("res://scenes/zombie.tscn")
@@ -40,7 +40,19 @@ func _ready() -> void:
 	var guardie := Node2D.new()
 	add_child(guardie)
 
+	var azioni := Azioni.new()
+	azioni.mondo = mondo
+	azioni.contenitore_guardie = guardie
+	add_child(azioni)
+
+	# le due fazioni che non stai giocando se la cavano da sole
+	for f in 3:
+		var ia := IAFazione.new()
+		ia.fazione = f
+		add_child(ia)
+
 	var p: Player = PLAYER.instantiate()
+	p.fazione = GameState.fazione_giocatore
 	p.global_position = mondo.piazza_centro()
 	p.mondo = mondo
 	p.guardie = guardie
@@ -89,7 +101,7 @@ func _process(delta: float) -> void:
 	if get_tree().get_nodes_in_group("edificio").all(func(e): return not e.in_piedi):
 		GameState.finita = true
 	if GameState.fase == GameState.Fase.GIORNO:
-		if GameState.tempo_fase >= Balance.GIORNO_DURATA:
+		if GameState.tempo_fase >= Balance.giorno_durata(GameState.giorno):
 			_inizia_notte()
 	else:
 		_notte(delta)
@@ -118,7 +130,14 @@ func _notte(delta: float) -> void:
 		GameState.cambia_fase(GameState.Fase.GIORNO)
 
 func _genera() -> void:
-	var cella: Vector2i = mondo.spawn_zombie.pick_random()
+	# i primi giorni arrivano solo dal ponte; poi la citta' si scopre circondata
+	var aperti: Array = []
+	for lato in Balance.fronti(GameState.giorno):
+		aperti.append_array(mondo.fronti[lato])
+	if aperti.is_empty():
+		aperti = mondo.spawn_zombie
+	var cella: Vector2i = aperti.pick_random()
+
 	var z: Zombie = ZOMBIE.instantiate()
 	z.mondo = mondo
 	# ogni zombie ha un obiettivo preciso: cosi' l'ondata si divide sui tre poli
@@ -126,7 +145,7 @@ func _genera() -> void:
 	var poli := get_tree().get_nodes_in_group("edificio").filter(func(e): return e.in_piedi)
 	if not poli.is_empty():
 		z.edificio_bersaglio = poli.pick_random()
-	z.global_position = mondo.centro(cella) + Vector2(randf_range(-24, 24), randf_range(-16, 16))
+	z.global_position = mondo.centro(cella) + Vector2(randf_range(-16, 16), randf_range(-12, 12))
 	_zombie.add_child(z)
 
 ## Debug: `godot -- --shot` salva una panoramica della mappa e esce.
@@ -137,8 +156,9 @@ func _scatta_panoramica() -> void:
 	add_child(cam)
 	cam.make_current()
 	if "--notte" in OS.get_cmdline_user_args():
+		GameState.giorno = 6
 		_inizia_notte()
-		for i in 40:
+		for i in 60:
 			_notte(Balance.SPAWN_RITMO)
 	await get_tree().create_timer(18.0 if "--notte" in OS.get_cmdline_user_args() else 2.0).timeout
 	get_viewport().get_texture().get_image().save_png("/tmp/lastbright_shot.png")
