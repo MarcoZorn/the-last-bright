@@ -20,7 +20,7 @@ godot --path .            # oppure apri il progetto nell'editor
 | SPAZIO | fendente frontale |
 | E | ripara la barricata piu' vicina |
 | Q | recluta una guardia |
-| 1-4 | le azioni della tua fazione (cambiano se ti depongono) |
+| 1-6 | le azioni della tua fazione (cambiano se ti depongono) |
 | click sx / dx | seleziona una guardia / mandala li' |
 | F1 F2 F3 | cambi fazione, per provare il gioco da solo |
 
@@ -39,6 +39,12 @@ fuori al posto suo.
 
 Vinci se reggi 10 giorni. Perdi se la popolazione arriva a zero o se crollano
 tutti e tre gli edifici.
+
+Le guardie **non si comprano una volta e basta**: costano 35$ per reclutarle e
+poi 7$ ciascuna ogni alba. Se all'alba le casse non bastano, quelle che non puoi
+pagare disertano e il morale ne risente. Puoi congedarne una col tasto 4
+dell'Esercito e recuperare 20$ -- e uno stipendio in meno da pagare. Una
+guarnigione grossa e' un impegno permanente, non un acquisto.
 
 Il tuo leader non e' un soldato: il fendente serve a toglierti dai guai. Per
 reggere un'ondata servono le guardie, che partono scarse e migliorano solo se
@@ -78,6 +84,7 @@ Dopo aver modificato la mappa:
 python3 tools/check_map.py                                  # non hai murato un varco?
 godot --headless --script res://tools/test_assedio.gd       # l'assedio funziona ancora?
 godot --headless --script res://tools/test_potere.gd        # il golpe scatta ancora?
+godot --headless --script res://tools/test_stipendi.gd      # i conti dell'esercito tornano?
 godot --headless --resolution 1280x720 -- --shot --notte    # panoramica in /tmp/lastbright_shot.png
 ```
 
