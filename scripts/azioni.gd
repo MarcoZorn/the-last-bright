@@ -34,6 +34,8 @@ func eseguibile(id: String) -> bool:
 	var a := _trova(id)
 	if a.is_empty() or _ricarica[id] > 0.0:
 		return false
+	if id == "licenzia":
+		return not get_tree().get_nodes_in_group("guardia").is_empty()
 	if id == "addestramento":
 		return GameState.livello_guardie < Balance.GUARDIA_LIVELLO_MAX \
 			and GameState.denaro >= GameState.costo_addestramento()
@@ -84,6 +86,14 @@ func _speciale(nome: String) -> void:
 			GameState.addestramenti += 1
 			GameState.livello_guardie += 1
 			GameState.annuncio.emit("Guardie di livello %d" % GameState.livello_guardie, Color(0.6, 0.9, 1))
+		"licenzia":
+			var scelte := get_tree().get_nodes_in_group("guardia")
+			if scelte.is_empty():
+				return
+			var congedata = scelte.filter(func(g): return g.selezionata)
+			var chi = congedata[0] if not congedata.is_empty() else scelte[0]
+			chi.queue_free()
+			GameState.modifica("denaro", Balance.GUARDIA_LIQUIDAZIONE)
 		"leva":
 			for i in 2:
 				_recluta(mondo.piazza_centro() + Vector2(randf_range(-30, 30), randf_range(-30, 30)))

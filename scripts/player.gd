@@ -53,7 +53,7 @@ func _physics_process(delta: float) -> void:
 ## a provare il gioco da soli: col multiplayer sparisce).
 func _scorciatoie() -> void:
 	var azioni := Azioni.istanza.per_fazione(GameState.fazione_effettiva())
-	for i in mini(azioni.size(), 4):
+	for i in mini(azioni.size(), 6):
 		if Input.is_action_just_pressed("azione_%d" % (i + 1)):
 			Azioni.istanza.esegui(azioni[i]["id"])
 	for f in 3:
