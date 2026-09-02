@@ -146,6 +146,8 @@ func _aggiorna_stato() -> void:
 	var resto := ""
 	if GameState.fase == GameState.Fase.GIORNO:
 		resto = "  (notte fra %ds)" % ceili(Balance.giorno_durata(GameState.giorno) - GameState.tempo_fase)
+	else:
+		resto = "  (alba fra %ds)" % maxi(ceili(Balance.notte_durata(GameState.giorno) - GameState.tempo_fase), 0)
 	var fronti: String = ", ".join(Balance.fronti(GameState.giorno))
 	_stato.text = ("  Giorno %d - %s%s\n" % [GameState.giorno, nome_fase, resto]
 		+ "  fronti aperti: %s\n\n" % fronti

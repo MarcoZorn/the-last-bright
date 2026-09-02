@@ -14,7 +14,11 @@ const POPOLAZIONE_INIZIALE := 120
 const GIORNO_BASE := 15.0
 const GIORNO_CRESCITA := 3.0       # secondi in piu' per ogni giorno passato
 const GIORNO_MAX := 45.0
-const NOTTE_MAX := 200.0
+## L'alba arriva comunque: senza, bastava uno zombie incastrato per bloccare
+## la partita in eterno.
+const NOTTE_BASE := 40.0
+const NOTTE_CRESCITA := 6.0
+const NOTTE_MAX := 120.0
 const GIORNI_PER_VINCERE := 10
 
 # --- ondate ---
@@ -151,6 +155,9 @@ const AZIONI := [
 
 static func giorno_durata(giorno: int) -> float:
 	return minf(GIORNO_BASE + GIORNO_CRESCITA * (giorno - 1), GIORNO_MAX)
+
+static func notte_durata(giorno: int) -> float:
+	return minf(NOTTE_BASE + NOTTE_CRESCITA * (giorno - 1), NOTTE_MAX)
 
 static func zombie_vita(giorno: int) -> float:
 	return ZOMBIE_VITA + ZOMBIE_VITA_PER_GIORNO * (giorno - 1)

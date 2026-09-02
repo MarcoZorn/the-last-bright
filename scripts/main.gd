@@ -136,9 +136,21 @@ func _notte(delta: float) -> void:
 		_prossimo_spawn = Balance.SPAWN_RITMO
 		_da_spawnare -= 1
 		_genera()
-	var finito: bool = _da_spawnare == 0 and _zombie.get_child_count() == 0
-	if finito or GameState.tempo_fase > Balance.NOTTE_MAX:
+	var ripulita: bool = _da_spawnare == 0 and _zombie.get_child_count() == 0
+	if ripulita:
 		GameState.cambia_fase(GameState.Fase.GIORNO)
+	elif GameState.tempo_fase > Balance.notte_durata(GameState.giorno):
+		_alba_brucia()
+
+## Il sole sorge comunque. Quelli ancora in giro non sopravvivono alla luce.
+func _alba_brucia() -> void:
+	var rimasti := get_tree().get_nodes_in_group("zombie")
+	for z in rimasti:
+		z.brucia()
+	_da_spawnare = 0
+	if not rimasti.is_empty():
+		GameState.annuncio.emit("L'alba ne brucia %d" % rimasti.size(), Color(1, 0.85, 0.4))
+	GameState.cambia_fase(GameState.Fase.GIORNO)
 
 func _genera() -> void:
 	# i primi giorni arrivano solo dal ponte; poi la citta' si scopre circondata
