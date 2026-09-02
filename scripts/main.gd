@@ -65,6 +65,11 @@ func _ready() -> void:
 
 	add_child(preload("res://scripts/hud.gd").new())
 
+	if "--esercito" in OS.get_cmdline_user_args():
+		GameState.fazione_giocatore = 2
+		p.fazione = 2
+		for i in 4:
+			Azioni.istanza._recluta(mondo.piazza_centro() + Vector2(randf_range(-40, 40), randf_range(-40, 40)))
 	if "--shot" in OS.get_cmdline_user_args():
 		_scatta_panoramica()
 

@@ -34,11 +34,11 @@ func _ready() -> void:
 	_banner.modulate.a = 0.0
 	telaio.add_child(_banner)
 
-	_annuncio.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_annuncio.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_annuncio.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_annuncio.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	_annuncio.add_theme_font_size_override("font_size", 18)
-	_annuncio.position = Vector2(0, 90)
-	_annuncio.size.x = 1280
+	_annuncio.offset_top = 94
 	_annuncio.modulate.a = 0.0
 	telaio.add_child(_annuncio)
 
@@ -57,7 +57,7 @@ func _ready() -> void:
 	piede.add_child(_vita)
 
 	var comandi := Label.new()
-	comandi.text = "WASD  SPAZIO attacca  E ripara  Q recluta  click sx/dx guardie  1-4 azioni  F1/F2/F3 cambia fazione"
+	comandi.text = "WASD  SPAZIO attacca  E ripara  Q recluta  click sx/dx guardie  1-6 azioni  F1/F2/F3 cambia fazione"
 	comandi.add_theme_font_size_override("font_size", 11)
 	comandi.position = Vector2(12, -18)
 	piede.add_child(comandi)
@@ -66,7 +66,7 @@ func _ready() -> void:
 	centro_basso.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	centro_basso.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	telaio.add_child(centro_basso)
-	_barra_azioni.position = Vector2(-330, -108)
+	_barra_azioni.position = Vector2(-478, -110)
 	_barra_azioni.add_theme_constant_override("separation", 6)
 	centro_basso.add_child(_barra_azioni)
 
@@ -103,6 +103,7 @@ func _aggiorna_stato() -> void:
 		+ "  Popolazione   %5d\n" % GameState.popolazione
 		+ "  Zombie uccisi %5d\n" % GameState.zombie_uccisi
 		+ "  Guardie liv.  %5d\n" % GameState.livello_guardie
+		+ "  Stipendi/alba %5.0f\n" % GameState.stipendi_dovuti()
 		+ ("  Spedizioni in corso %d\n" % Spedizione.in_corso if Spedizione.in_corso > 0 else ""))
 
 func _aggiorna_potere() -> void:
@@ -128,12 +129,12 @@ func _aggiorna_azioni() -> void:
 		for c in _barra_azioni.get_children():
 			c.queue_free()
 		var elenco := Azioni.istanza.per_fazione(mia)
-		for i in mini(elenco.size(), 4):
+		for i in mini(elenco.size(), 6):
 			var scatola := PanelContainer.new()
 			var testo := Label.new()
 			testo.name = "testo"
-			testo.add_theme_font_size_override("font_size", 12)
-			testo.custom_minimum_size = Vector2(160, 40)
+			testo.add_theme_font_size_override("font_size", 11)
+			testo.custom_minimum_size = Vector2(150, 58)
 			testo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			scatola.add_child(testo)
 			_barra_azioni.add_child(scatola)
