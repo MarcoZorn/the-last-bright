@@ -34,6 +34,7 @@ var porte: Array[Vector2i] = []
 var piazza: Array[Vector2i] = []
 
 var varchi: Array = []          # gruppi contigui di celle "+": ogni gruppo e' una barricata
+var edifici := {}               # carattere "C"/"G"/"A" -> celle di quell'edificio
 
 var _solidi_extra := {}         # celle rese solide a runtime (barricate in piedi)
 var _astar := AStarGrid2D.new()
@@ -48,7 +49,9 @@ func _ready() -> void:
 	_dipingi()
 	_crea_collisioni()
 	_prepara_astar()
-	_raggruppa_varchi()
+	varchi = _raggruppa(porte)
+	for ch in ["C", "G", "A"]:
+		edifici[ch] = _celle_con(ch)
 
 func carattere(c: Vector2i) -> String:
 	if c.x < 0 or c.y < 0 or c.x >= larghezza or c.y >= altezza:
@@ -154,10 +157,19 @@ func _prepara_astar() -> void:
 			if bloccato(Vector2i(x, y)):
 				_astar.set_point_solid(Vector2i(x, y), true)
 
-## Celle "+" adiacenti = un solo varco. Cosi' una porta larga 4 tile e' una
+func _celle_con(ch: String) -> Array[Vector2i]:
+	var fuori: Array[Vector2i] = []
+	for y in altezza:
+		for x in larghezza:
+			if griglia[y][x] == ch:
+				fuori.append(Vector2i(x, y))
+	return fuori
+
+## Celle adiacenti = un solo oggetto. Cosi' una porta larga 4 tile e' una
 ## barricata sola con una barra di vita sola, non quattro.
-func _raggruppa_varchi() -> void:
-	var restanti := porte.duplicate()
+func _raggruppa(celle: Array[Vector2i]) -> Array:
+	var gruppi: Array = []
+	var restanti := celle.duplicate()
 	while not restanti.is_empty():
 		var gruppo: Array[Vector2i] = []
 		var coda: Array[Vector2i] = [restanti.pop_back()]
@@ -169,4 +181,5 @@ func _raggruppa_varchi() -> void:
 				if i >= 0:
 					coda.append(restanti[i])
 					restanti.remove_at(i)
-		varchi.append(gruppo)
+		gruppi.append(gruppo)
+	return gruppi
