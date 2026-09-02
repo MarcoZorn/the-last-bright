@@ -58,9 +58,14 @@ for r in (33, 34, 35):
 
 # blocco veicolare a sud, fuori le mura
 box(50, 50, 17, 22, 'V')
-# sorgenti dell'infezione, oltre il fiume
+# sorgenti dell'infezione: il grosso arriva da oltre il fiume e deve passare
+# per il ponte, ma i fianchi e le spalle non sono sicuri.
 for c in (8, 19, 30):
-    g[1][c] = 'S'
+    g[1][c] = 'S'          # nord, oltre il fiume: la pressione principale
+for r in (26, 34, 44):
+    g[r][0] = g[r][W - 1] = 'S'   # fianchi
+for c in (10, 20, 30):
+    g[H - 1][c] = 'S'      # alle spalle
 
 open('assets/map.txt', 'w').write('\n'.join(''.join(r) for r in g) + '\n')
 print(f'assets/map.txt {W}x{H}')
