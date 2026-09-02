@@ -85,7 +85,9 @@ func ripara(quanto: float) -> void:
 
 func _chiudi() -> void:
 	_corpo = StaticBody2D.new()
-	_corpo.collision_layer = 1
+	# livello 3: gli zombie lo intercettano, tu e le guardie no. I cancelli si
+	# aprono dalla parte giusta, cosi' si puo' uscire in sortita.
+	_corpo.collision_layer = 4
 	_corpo.collision_mask = 0
 	add_child(_corpo)
 	for c in celle:

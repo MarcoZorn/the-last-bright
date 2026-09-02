@@ -18,6 +18,7 @@ var _barra: BarraVita
 var _anello := Line2D.new()
 var _livello_visto := -1
 var _sprite: Sprite2D
+var _meta_diretta := Vector2.INF
 var _tempo := 0.0
 
 func _ready() -> void:
@@ -62,9 +63,13 @@ func attaccabile() -> bool:
 func distanza(p: Vector2) -> float:
 	return global_position.distance_to(p)
 
+## Se A* non trova strada e' quasi sempre perche' il varco e' chiuso: le guardie
+## ci passano lo stesso, quindi si va in linea retta e ci pensa la fisica.
 func vai_a(punto: Vector2) -> void:
-	if mondo != null:
-		_percorso = mondo.percorso(global_position, punto)
+	if mondo == null:
+		return
+	_percorso = mondo.percorso(global_position, punto)
+	_meta_diretta = punto if _percorso.is_empty() else Vector2.INF
 
 func subisci(danno: float, _spinta := Vector2.ZERO) -> void:
 	vita -= danno
@@ -85,6 +90,10 @@ func _physics_process(delta: float) -> void:
 		velocity = global_position.direction_to(passo) * Balance.GUARDIA_VELOCITA
 		if global_position.distance_to(passo) < 3.0:
 			_percorso.remove_at(0)
+	elif _meta_diretta != Vector2.INF:
+		velocity = global_position.direction_to(_meta_diretta) * Balance.GUARDIA_VELOCITA
+		if global_position.distance_to(_meta_diretta) < 6.0:
+			_meta_diretta = Vector2.INF
 	else:
 		velocity = Vector2.ZERO
 		_percorso.clear()

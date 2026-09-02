@@ -17,11 +17,15 @@ var _barricata: Barricata
 var _fra_ricalcoli := 0.0
 var _spinta := Vector2.ZERO
 var _tempo := 0.0
+var _ultima_posizione := Vector2.ZERO
+var _fermo_da := 0.0
 
 var _barra: BarraVita
 
 func _ready() -> void:
 	add_to_group("zombie")
+	collision_layer = 8
+	collision_mask = 1 | 4   # mura del mondo + barricate in piedi
 	_fra_ricalcoli = randf() * Balance.PATH_REFRESH  # sfasa il costo su piu' frame
 	# ogni notte quelli che arrivano sono piu' duri di quelli di ieri
 	vita_max = Balance.zombie_vita(GameState.giorno)
@@ -62,6 +66,23 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_tempo += delta
 	Grafica.passo($Sprite2D, velocity, _tempo)
+	_sblocca(delta)
+
+## Un incastro fra due muri o fra dieci zombie ammassati non deve congelare la
+## partita: se non ci si muove da un po', si ripianifica e si prende una spinta.
+func _sblocca(delta: float) -> void:
+	if global_position.distance_to(_ultima_posizione) > 2.0:
+		_ultima_posizione = global_position
+		_fermo_da = 0.0
+		return
+	_fermo_da += delta
+	if _fermo_da < 3.0:
+		return
+	_fermo_da = 0.0
+	_ultima_posizione = global_position
+	_percorso.clear()
+	_fra_ricalcoli = 0.0
+	_spinta = Vector2.RIGHT.rotated(randf() * TAU) * Balance.SPINTA_COLPO
 
 ## Mordono qualunque cosa gli capiti a tiro: muri, guardie, leader, edifici.
 func _preda_a_portata() -> Node2D:
@@ -122,6 +143,13 @@ func subisci(danno: float, spinta := Vector2.ZERO) -> void:
 	create_tween().tween_property($Sprite2D, "modulate", tinta, 0.15)
 	if vita <= 0.0:
 		_muori()
+
+## L'alba: chi e' rimasto fuori brucia. Non conta come uccisione, non e' merito
+## di nessuno.
+func brucia() -> void:
+	Grafica.schizzo(get_parent(), global_position, Color(1, 0.75, 0.35), 5)
+	remove_from_group("zombie")
+	queue_free()
 
 func _muori() -> void:
 	GameState.zombie_uccisi += 1
