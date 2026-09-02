@@ -1,42 +1,35 @@
-extends SceneTree
-## godot --headless --script res://tools/test_potere.gd
+extends Node
+## godot --headless res://tools/test_potere.tscn
 ## Il potere e' a somma zero: se questo si rompe, una fazione puo' salire senza
 ## che nessuno scenda e il golpe non arriva mai.
 
-## Con --script gli autoload non sono identificatori globali: si prende dal tree.
-var GS: Node = null
-
-func _process(_delta: float) -> bool:
-	GS = root.get_node_or_null("GameState")
-	if GS == null:
-		print("!! autoload GameState non disponibile in questo contesto")
-		return true
+func _ready() -> void:
 	assert(is_equal_approx(_somma(), 100.0), "il potere deve sempre sommare 100")
 
 	# una Chiesa con morale altissimo e un Esercito con le mura a pezzi:
 	# prima o poi qualcuno deve saltare
-	GS.morale = 100.0
-	GS.denaro = 400.0
-	GS.sicurezza = 0.0
-	var golpe_avvenuto := false
+	GameState.morale = 100.0
+	GameState.denaro = 400.0
+	GameState.sicurezza = 0.0
+	var golpe := false
 	for giorno in 40:
-		GS._ridistribuisci_potere()
-		GS._controlla_golpe()
+		GameState._ridistribuisci_potere()
+		GameState._controlla_golpe()
 		assert(is_equal_approx(_somma(), 100.0), "il potere deve restare normalizzato")
-		if GS.deposta >= 0:
-			golpe_avvenuto = true
+		if GameState.deposta >= 0:
+			golpe = true
 			break
-	assert(golpe_avvenuto, "chi non produce risultati deve essere deposto")
-	assert(GS.deposta == 2, "con le mura a zero deve cadere l'Esercito, non altri")
-	print("OK potere: golpe dopo il collasso delle mura, deposta = %s" % GS.NOMI[GS.deposta])
+	assert(golpe, "chi non produce risultati deve essere deposto")
+	assert(GameState.deposta == 2, "con le mura a zero deve cadere l'Esercito")
+	print("OK potere: golpe dopo il collasso delle mura, deposta = %s" % GameState.NOMI[GameState.deposta])
 
 	# il ribelle che si riprende il consenso torna al potere e ne butta fuori un altro
-	GS.potere[2] = 60.0
-	GS.normalizza_potere()
-	GS._controlla_golpe()
-	assert(GS.deposta != 2, "il ribelle che supera la soglia deve rientrare")
-	print("OK ritorno: ora e' fuori %s" % GS.NOMI[GS.deposta])
-	return true
+	GameState.potere[2] = 60.0
+	GameState.normalizza_potere()
+	GameState._controlla_golpe()
+	assert(GameState.deposta != 2, "il ribelle che supera la soglia deve rientrare")
+	print("OK ritorno: ora e' fuori %s" % GameState.NOMI[GameState.deposta])
+	get_tree().quit()
 
 func _somma() -> float:
-	return GS.potere[0] + GS.potere[1] + GS.potere[2]
+	return GameState.potere[0] + GameState.potere[1] + GameState.potere[2]

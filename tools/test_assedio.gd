@@ -1,23 +1,22 @@
-extends SceneTree
-## godot --headless --script res://tools/test_assedio.gd
+extends Node
+## godot --headless res://tools/test_assedio.tscn
 ## Verifica la meccanica su cui poggia tutto l'assedio: finche' le barricate
 ## reggono NON deve esistere una strada verso la piazza; quando cadono deve
 ## aprirsi da sola; riparandole deve richiudersi. Se questo si rompe, gli zombie
 ## smettono di assediare e il gioco sembra funzionare lo stesso.
+## Gira come scena e non con --script, cosi' gli autoload ci sono davvero.
 
-## Il test gira al primo frame, non in _initialize: prima che il main loop
-## parta i nodi aggiunti non ricevono _ready.
-func _process(_delta: float) -> bool:
+func _ready() -> void:
 	var mondo: World = load("res://scripts/world.gd").new()
-	root.add_child(mondo)
+	add_child(mondo)
 	var barricate: Array[Barricata] = []
 	for gruppo in mondo.varchi:
 		var b := Barricata.new()
 		b.mondo = mondo
 		b.celle.assign(gruppo)
-		root.add_child(b)
+		add_child(b)
 		barricate.append(b)
-	print("varchi: %d" % barricate.size())
+	assert(barricate.size() == 5, "cinque varchi: il ponte e le quattro porte")
 
 	var spawn: Vector2 = mondo.centro(mondo.spawn_zombie[0])
 	var piazza: Vector2 = mondo.piazza_centro()
@@ -30,5 +29,5 @@ func _process(_delta: float) -> bool:
 		b.ripara(Balance.BARRICATA_VITA)
 	assert(mondo.percorso(spawn, piazza).is_empty(), "barricate riparate: il percorso deve richiudersi")
 
-	print("OK assedio")
-	return true
+	print("OK assedio: %d varchi chiudono, cadono e si richiudono" % barricate.size())
+	get_tree().quit()
