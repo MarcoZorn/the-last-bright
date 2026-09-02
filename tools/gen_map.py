@@ -6,7 +6,9 @@ script SOVRASCRIVE le modifiche manuali.
 Legenda:  . erba   ~ acqua   = ponte   # muro   + porta/barricata
           , terra  : piazza  C chiesa  G governo  A caserma
           V blocco veicolare   S spawn zombie
+          t albero  o barile/cassa  x sacchi di sabbia   (tutti solidi)
 """
+import random
 W, H = 40, 52
 BRIDGE = range(18, 22)          # colonne del ponte
 SQ_TOP, SQ_BOT, SQ_L, SQ_R = 20, 49, 4, 35   # muri della piazza fortificata
@@ -66,6 +68,36 @@ for r in (26, 34, 44):
     g[r][0] = g[r][W - 1] = 'S'   # fianchi
 for c in (10, 20, 30):
     g[H - 1][c] = 'S'      # alle spalle
+
+# arredo: la piazza vuota sembrava un parcheggio. Seme fisso, cosi' la mappa
+# e' sempre la stessa e si puo' ritoccare a mano dopo.
+random.seed(7)
+
+def libera(r, c):
+    """Non arreda sopra strade, varchi o le loro vicinanze: gli zombie devono
+    poter arrivare e i giocatori poter passare."""
+    if g[r][c] != ',':
+        return False
+    for dr in range(-2, 3):
+        for dc in range(-2, 3):
+            rr, cc = r + dr, c + dc
+            if 0 <= rr < H and 0 <= cc < W and g[rr][cc] in '+=':
+                return False
+    return True
+
+posti = [(r, c) for r in range(SQ_TOP + 1, SQ_BOT) for c in range(SQ_L + 1, SQ_R) if libera(r, c)]
+random.shuffle(posti)
+for i, (r, c) in enumerate(posti[:46]):
+    g[r][c] = 'oxt'[i % 3] if i % 4 else 'o'
+
+# alberi e macerie fuori le mura, ma non sulle rotte di avvicinamento
+fuori = [(r, c) for r in range(H) for c in range(W)
+         if g[r][c] == '.' and not any(
+             g[r + dr][c + dc] in 'S+=' for dr in (-1, 0, 1) for dc in (-1, 0, 1)
+             if 0 <= r + dr < H and 0 <= c + dc < W)]
+random.shuffle(fuori)
+for r, c in fuori[:70]:
+    g[r][c] = 't'
 
 open('assets/map.txt', 'w').write('\n'.join(''.join(r) for r in g) + '\n')
 print(f'assets/map.txt {W}x{H}')

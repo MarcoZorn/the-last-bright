@@ -23,8 +23,20 @@ const TILES := {
 	"G": [0, Vector2i(5, 4)],   # governo
 	"A": [0, Vector2i(1, 6)],   # caserma
 	"V": [1, Vector2i(6, 5)],   # blocco veicolare
+	"t": [0, Vector2i(4, 0)],   # albero
+	"o": [0, Vector2i(10, 8)],  # barile
+	"x": [0, Vector2i(9, 3)],   # sacchi di sabbia
 }
-const BLOCCANTI := "~#CGAV"
+const BLOCCANTI := "~#CGAVtox"
+
+## Le nove facce del muro di cinta nell'atlante tiny-town: e' un blocco 3x3,
+## angoli sugli spigoli e lati sui bordi.
+const MURO := {
+	"alto": Vector2i(1, 8), "basso": Vector2i(1, 10),
+	"sinistra": Vector2i(0, 9), "destra": Vector2i(2, 9),
+	"ang_as": Vector2i(0, 8), "ang_ad": Vector2i(2, 8),
+	"ang_bs": Vector2i(0, 10), "ang_bd": Vector2i(2, 10),
+}
 
 var larghezza: int
 var altezza: int
@@ -118,7 +130,10 @@ func _dipingi() -> void:
 		for x in larghezza:
 			var ch := griglia[y][x]
 			var t: Array = TILES.get(ch, TILES["."])
-			_layer.set_cell(Vector2i(x, y), t[0], t[1])
+			if ch == "#":
+				_layer.set_cell(Vector2i(x, y), 0, _faccia_muro(x, y))
+			else:
+				_layer.set_cell(Vector2i(x, y), t[0], t[1])
 			match ch:
 				"S":
 					spawn_zombie.append(Vector2i(x, y))
@@ -164,6 +179,24 @@ func _prepara_astar() -> void:
 		for x in larghezza:
 			if bloccato(Vector2i(x, y)):
 				_astar.set_point_solid(Vector2i(x, y), true)
+
+## Sceglie la faccia giusta del muro guardando i vicini. Assunzione: la
+## fortificazione e' convessa e la piazza sta al centro -- vale per Ponte Milvio,
+## se un giorno disegneremo mura concave qui servira' un autotile vero.
+func _faccia_muro(x: int, y: int) -> Vector2i:
+	var su := carattere(Vector2i(x, y - 1)) == "#"
+	var giu := carattere(Vector2i(x, y + 1)) == "#"
+	var sx := carattere(Vector2i(x - 1, y)) == "#"
+	var dx := carattere(Vector2i(x + 1, y)) == "#"
+	var sopra := y < altezza / 2
+	var a_sinistra := x < larghezza / 2
+	if (sx or dx) and (su or giu):
+		if sopra:
+			return MURO["ang_as"] if a_sinistra else MURO["ang_ad"]
+		return MURO["ang_bs"] if a_sinistra else MURO["ang_bd"]
+	if su or giu:
+		return MURO["sinistra"] if a_sinistra else MURO["destra"]
+	return MURO["alto"] if sopra else MURO["basso"]
 
 func _celle_con(ch: String) -> Array[Vector2i]:
 	var fuori: Array[Vector2i] = []
