@@ -10,15 +10,31 @@ var vita: float = Balance.BARRICATA_VITA
 var in_piedi := true
 
 var _corpo: StaticBody2D
+var _barra: BarraVita
 var _approcci: PackedVector2Array
 
 func _ready() -> void:
 	add_to_group("barricata")
+	add_to_group("danneggiabile")
 	_chiudi()
 	for c in celle:
 		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
 			if not mondo.bloccato(c + d):
 				_approcci.append(mondo.centro(c + d))
+	_crea_barra()
+
+## Barra di vita sopra il varco: senza, non si capisce quale porta sta cedendo.
+func _crea_barra() -> void:
+	var centro_visivo := Vector2.ZERO
+	for c in celle:
+		centro_visivo += mondo.centro(c)
+	_barra = BarraVita.new(34.0, 0.0)
+	add_child(_barra)
+	_barra.global_position = centro_visivo / celle.size() - Vector2(17, 14)
+	_barra.aggiorna(1.0)
+
+func attaccabile() -> bool:
+	return in_piedi
 
 ## Dove deve arrivare uno zombie per poterla picchiare.
 func punto_approccio(da: Vector2) -> Vector2:
@@ -37,10 +53,11 @@ func distanza(p: Vector2) -> float:
 		d_min = minf(d_min, p.distance_to(mondo.centro(c)))
 	return d_min
 
-func danneggia(quanto: float) -> void:
+func subisci(quanto: float, _spinta := Vector2.ZERO) -> void:
 	if not in_piedi:
 		return
 	vita -= quanto
+	_barra.aggiorna(vita / Balance.BARRICATA_VITA)
 	if vita <= 0.0:
 		vita = 0.0
 		in_piedi = false
@@ -49,6 +66,7 @@ func danneggia(quanto: float) -> void:
 ## Riparabile anche da caduta: risigillare una breccia costa, ma si puo' fare.
 func ripara(quanto: float) -> void:
 	vita = minf(vita + quanto, Balance.BARRICATA_VITA)
+	_barra.aggiorna(vita / Balance.BARRICATA_VITA)
 	if not in_piedi and vita > 0.0:
 		in_piedi = true
 		_chiudi()
