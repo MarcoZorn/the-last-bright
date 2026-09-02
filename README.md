@@ -90,3 +90,55 @@ godot --headless --resolution 1280x720 -- --shot --notte    # panoramica in /tmp
 
 Kenney (kenney.nl), licenza CC0. Scaricati con `tools/fetch-assets.sh`.
 Sono placeholder: servono a leggere la mappa, non a essere l'aspetto finale.
+
+## Far provare il gioco a qualcuno
+
+Il manuale completo e' in [MANUALE.md](MANUALE.md), e si apre anche dentro il
+gioco col tasto **H**.
+
+### A un amico con Windows
+
+```bash
+godot --headless --export-release "Windows Desktop"
+```
+
+Produce `build/windows/TheLastBright.exe`: **un unico file da ~105 MB**, con il
+motore incluso. Non serve installare niente, si fa doppio clic. Windows mostrera'
+l'avviso "SmartScreen" perche' l'eseguibile non e' firmato: "Ulteriori
+informazioni" → "Esegui comunque". Per mandarlo, zippalo (scende a ~45 MB) e
+usa WeTransfer o una Release di GitHub -- via mail non passa.
+
+### Sul web
+
+```bash
+godot --headless --export-release "Web"
+```
+
+Produce `build/web/`. E' compilato **senza thread**, quindi gira su qualunque
+hosting statico senza bisogno di header speciali (COOP/COEP), che e' la trappola
+classica dei build web di Godot.
+
+Per provarlo in locale:
+
+```bash
+cd build/web && python3 -m http.server 8777
+# poi apri http://localhost:8777
+```
+
+Per metterlo online, in ordine di comodita':
+
+1. **itch.io** — la strada giusta per un gioco. Crei un progetto, scegli "HTML",
+   carichi lo zip di `build/web/`, imposti `index.html` come file principale.
+   Gratis, e puoi tenerlo **non in elenco** con un link segreto da mandare solo
+   a chi vuoi.
+2. **GitHub Pages** — gratis ma richiede che il repo sia **pubblico**:
+   ```bash
+   gh repo edit --visibility public --accept-visibility-change-consequences
+   git subtree push --prefix build/web origin gh-pages
+   gh api -X POST repos/:owner/:repo/pages -f source[branch]=gh-pages -f source[path]=/
+   ```
+   Il gioco finisce su `https://<utente>.github.io/<repo>/`.
+3. **Netlify / Cloudflare Pages** — trascini la cartella `build/web` nella loro
+   pagina di upload e ti danno un link. Zero configurazione, repo privato.
+
+> `build/` non e' versionato: sono ~150 MB di roba rigenerabile con due comandi.
