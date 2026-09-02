@@ -33,6 +33,9 @@ var spawn_zombie: Array[Vector2i] = []
 var porte: Array[Vector2i] = []
 var piazza: Array[Vector2i] = []
 
+var varchi: Array = []          # gruppi contigui di celle "+": ogni gruppo e' una barricata
+
+var _solidi_extra := {}         # celle rese solide a runtime (barricate in piedi)
 var _astar := AStarGrid2D.new()
 var _layer := TileMapLayer.new()
 
@@ -45,6 +48,7 @@ func _ready() -> void:
 	_dipingi()
 	_crea_collisioni()
 	_prepara_astar()
+	_raggruppa_varchi()
 
 func carattere(c: Vector2i) -> String:
 	if c.x < 0 or c.y < 0 or c.x >= larghezza or c.y >= altezza:
@@ -52,7 +56,20 @@ func carattere(c: Vector2i) -> String:
 	return griglia[c.y][c.x]
 
 func bloccato(c: Vector2i) -> bool:
-	return BLOCCANTI.contains(carattere(c))
+	return BLOCCANTI.contains(carattere(c)) or _solidi_extra.has(c)
+
+## Le barricate aprono e chiudono varchi a partita in corso: A* e collisioni
+## devono restare d'accordo, quindi passano tutte da qui.
+func imposta_solido(c: Vector2i, solido: bool) -> void:
+	if solido:
+		_solidi_extra[c] = true
+	else:
+		_solidi_extra.erase(c)
+	_astar.set_point_solid(c, solido)
+
+func dipingi_cella(c: Vector2i, ch: String) -> void:
+	var t: Array = TILES.get(ch, TILES["."])
+	_layer.set_cell(c, t[0], t[1])
 
 func centro(c: Vector2i) -> Vector2:
 	return Vector2(c.x + 0.5, c.y + 0.5) * T
@@ -136,3 +153,20 @@ func _prepara_astar() -> void:
 		for x in larghezza:
 			if bloccato(Vector2i(x, y)):
 				_astar.set_point_solid(Vector2i(x, y), true)
+
+## Celle "+" adiacenti = un solo varco. Cosi' una porta larga 4 tile e' una
+## barricata sola con una barra di vita sola, non quattro.
+func _raggruppa_varchi() -> void:
+	var restanti := porte.duplicate()
+	while not restanti.is_empty():
+		var gruppo: Array[Vector2i] = []
+		var coda: Array[Vector2i] = [restanti.pop_back()]
+		while not coda.is_empty():
+			var c: Vector2i = coda.pop_back()
+			gruppo.append(c)
+			for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+				var i := restanti.find(c + d)
+				if i >= 0:
+					coda.append(restanti[i])
+					restanti.remove_at(i)
+		varchi.append(gruppo)
