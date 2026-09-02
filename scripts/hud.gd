@@ -74,6 +74,7 @@ func _ready() -> void:
 	_costruisci_manuale()
 	telaio.add_child(_manuale)
 
+	telaio.add_child(Minimappa.new())
 	telaio.add_child(Frecce.new())
 
 	GameState.fase_cambiata.connect(_annuncia_fase)
@@ -253,3 +254,80 @@ class Frecce extends Control:
 			dove + Vector2(-7, 7).rotated(a),
 			dove + Vector2(-7, -7).rotated(a)])
 		draw_colored_polygon(punte, colore)
+
+
+## Minimappa: la citta' non ci sta in uno schermo, e senza una vista d'insieme
+## non si capisce mai da che parte si sta perdendo.
+class Minimappa extends Control:
+	const SCALA := 3.0
+
+	var _mondo: World
+	var _terreno: ImageTexture
+
+	func _ready() -> void:
+		# ancoraggio a tutto schermo e posizione calcolata in _draw: gli anchor
+		# risolti in _ready dipendono da una dimensione del genitore che a quel
+		# punto non c'e' ancora, e la minimappa finiva fuori schermo.
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_mondo = get_tree().get_first_node_in_group("mondo")
+		if _mondo != null:
+			_disegna_terreno()
+
+	## Il terreno non cambia mai: si disegna una volta sola in una texture,
+	## invece di duemila rettangoli a ogni frame.
+	func _disegna_terreno() -> void:
+		var img := Image.create(_mondo.larghezza, _mondo.altezza, false, Image.FORMAT_RGBA8)
+		for y in _mondo.altezza:
+			for x in _mondo.larghezza:
+				img.set_pixel(x, y, _tinta(_mondo.carattere(Vector2i(x, y))))
+		_terreno = ImageTexture.create_from_image(img)
+
+	func _tinta(ch: String) -> Color:
+		match ch:
+			"~": return Color(0.16, 0.30, 0.50)
+			"#": return Color(0.62, 0.64, 0.70)
+			"=", ":": return Color(0.55, 0.57, 0.60)
+			"C": return Color(0.45, 0.55, 0.85)
+			"G": return Color(0.80, 0.35, 0.35)
+			"A": return Color(0.70, 0.50, 0.30)
+			"t": return Color(0.20, 0.40, 0.22)
+			",": return Color(0.42, 0.34, 0.26)
+			_: return Color(0.28, 0.42, 0.26)
+
+	func _process(_d: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		if _mondo == null or _terreno == null:
+			return
+		var dim := Vector2(_mondo.larghezza, _mondo.altezza) * SCALA
+		var schermo := get_viewport_rect().size
+		var org := schermo - dim - Vector2(14, 14)
+		draw_rect(Rect2(org - Vector2(2, 2), dim + Vector2(4, 4)), Color(0, 0, 0, 0.65))
+		draw_texture_rect(_terreno, Rect2(org, dim), false)
+
+		for b in get_tree().get_nodes_in_group("barricata"):
+			var quota: float = b.vita / Balance.BARRICATA_VITA
+			var colore := Color(1.0 - quota * 0.9, 0.25 + 0.7 * quota, 0.2)
+			if not b.in_piedi:
+				colore = Color(0.25, 0.1, 0.1)
+			for cella in b.celle:
+				draw_rect(Rect2(org + Vector2(cella) * SCALA, Vector2.ONE * SCALA), colore)
+
+		_punti(org, "zombie", Color(0.55, 0.95, 0.4), 2.0)
+		_punti(org, "guardia", Color(0.5, 0.8, 1.0), 2.5)
+		_punti(org, "player", Color(1, 1, 1), 3.5)
+
+		# dove stai guardando adesso, ritagliato ai bordi della minimappa:
+		# con la telecamera molto larga il rettangolo sforava fuori dal riquadro
+		var trasf := get_viewport().get_canvas_transform()
+		var vista := Rect2(-trasf.origin / trasf.get_scale(), schermo / trasf.get_scale())
+		var a := org + (vista.position / Balance.TILE * SCALA).clamp(Vector2.ZERO, dim)
+		var b := org + ((vista.position + vista.size) / Balance.TILE * SCALA).clamp(Vector2.ZERO, dim)
+		draw_rect(Rect2(a, b - a), Color(1, 1, 1, 0.4), false, 1.0)
+
+	func _punti(org: Vector2, gruppo: String, colore: Color, raggio: float) -> void:
+		for n in get_tree().get_nodes_in_group(gruppo):
+			var c: Vector2 = n.global_position / Balance.TILE * SCALA
+			draw_circle(org + c, raggio, colore)

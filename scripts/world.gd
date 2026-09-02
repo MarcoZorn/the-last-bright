@@ -54,6 +54,7 @@ var _astar := AStarGrid2D.new()
 var _layer := TileMapLayer.new()
 
 func _ready() -> void:
+	add_to_group("mondo")
 	griglia = FileAccess.get_file_as_string("res://assets/map.txt").strip_edges().split("\n")
 	altezza = griglia.size()
 	larghezza = griglia[0].length()
