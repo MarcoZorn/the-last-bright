@@ -30,6 +30,7 @@ var larghezza: int
 var altezza: int
 var griglia: PackedStringArray
 var spawn_zombie: Array[Vector2i] = []
+var fronti := {"nord": [], "fianchi": [], "sud": []}   # spawn raggruppati per lato
 var porte: Array[Vector2i] = []
 var piazza: Array[Vector2i] = []
 
@@ -119,7 +120,14 @@ func _dipingi() -> void:
 			var t: Array = TILES.get(ch, TILES["."])
 			_layer.set_cell(Vector2i(x, y), t[0], t[1])
 			match ch:
-				"S": spawn_zombie.append(Vector2i(x, y))
+				"S":
+					spawn_zombie.append(Vector2i(x, y))
+					if y < altezza / 3:
+						fronti["nord"].append(Vector2i(x, y))
+					elif x == 0 or x == larghezza - 1:
+						fronti["fianchi"].append(Vector2i(x, y))
+					else:
+						fronti["sud"].append(Vector2i(x, y))
 				"+": porte.append(Vector2i(x, y))
 				":": piazza.append(Vector2i(x, y))
 
