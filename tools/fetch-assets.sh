@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Scarica i pack CC0 di Kenney. Il link zip e' generato con un hash, va estratto dalla pagina.
 set -euo pipefail
-DEST="$(dirname "$0")/../client/public/assets/kenney"
+DEST="$(dirname "$0")/../assets/kenney"
 mkdir -p "$DEST"
 for slug in "$@"; do
   [ -d "$DEST/$slug" ] && { echo "skip $slug (gia' presente)"; continue; }
