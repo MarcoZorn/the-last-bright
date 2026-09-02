@@ -4,7 +4,7 @@ class_name Proiettile
 ## scala un proiettile balistico manca troppo e sembra rotto.
 
 var bersaglio: Node2D
-var danno: float = Balance.PROIETTILE_DANNO
+var danno: float = Balance.PROIETTILE_DANNO[0]
 
 func _ready() -> void:
 	var c := ColorRect.new()
