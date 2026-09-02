@@ -10,6 +10,7 @@ var _zombie: Node2D
 var _da_spawnare := 0
 var _prossimo_spawn := 0.0
 var _vita_totale_barricate := 0.0
+var _luce: CanvasModulate
 
 func _ready() -> void:
 	mondo = preload("res://scripts/world.gd").new()
@@ -24,6 +25,16 @@ func _ready() -> void:
 		barricate.add_child(b)
 	_vita_totale_barricate = mondo.varchi.size() * Balance.BARRICATA_VITA
 
+	var quartieri := Node2D.new()
+	add_child(quartieri)
+	for tipo in mondo.edifici:
+		for gruppo in mondo._raggruppa(mondo.edifici[tipo]):
+			var e := Edificio.new()
+			e.mondo = mondo
+			e.tipo = tipo
+			e.celle.assign(gruppo)
+			quartieri.add_child(e)
+
 	_zombie = Node2D.new()
 	add_child(_zombie)
 	var guardie := Node2D.new()
@@ -35,16 +46,48 @@ func _ready() -> void:
 	p.guardie = guardie
 	add_child(p)
 
+	_luce = CanvasModulate.new()
+	_luce.color = Color.WHITE
+	add_child(_luce)
+	GameState.fase_cambiata.connect(_illumina)
+
 	add_child(preload("res://scripts/hud.gd").new())
 
 	if "--shot" in OS.get_cmdline_user_args():
 		_scatta_panoramica()
+
+## Selezione e ordini alle guardie: sinistro seleziona, destro manda.
+func _unhandled_input(evento: InputEvent) -> void:
+	if not (evento is InputEventMouseButton and evento.pressed):
+		return
+	var punto := get_global_mouse_position()
+	if evento.button_index == MOUSE_BUTTON_LEFT:
+		var scelta: Guardia = null
+		var d_min := 14.0
+		for g in get_tree().get_nodes_in_group("guardia"):
+			var d: float = g.global_position.distance_to(punto)
+			if d < d_min:
+				d_min = d
+				scelta = g
+		for g in get_tree().get_nodes_in_group("guardia"):
+			g.selezionata = (g == scelta)
+	elif evento.button_index == MOUSE_BUTTON_RIGHT:
+		for g in get_tree().get_nodes_in_group("guardia"):
+			if g.selezionata:
+				g.vai_a(punto)
+
+## La notte deve sembrare notte, non un giorno con piu' zombie.
+func _illumina(nuova: GameState.Fase) -> void:
+	var colore := Color.WHITE if nuova == GameState.Fase.GIORNO else Color(0.44, 0.47, 0.58)
+	create_tween().tween_property(_luce, "color", colore, 2.5)
 
 func _process(delta: float) -> void:
 	if GameState.finita:
 		return
 	GameState.tempo_fase += delta
 	_aggiorna_sicurezza()
+	if get_tree().get_nodes_in_group("edificio").all(func(e): return not e.in_piedi):
+		GameState.finita = true
 	if GameState.fase == GameState.Fase.GIORNO:
 		if GameState.tempo_fase >= Balance.GIORNO_DURATA:
 			_inizia_notte()
@@ -78,6 +121,11 @@ func _genera() -> void:
 	var cella: Vector2i = mondo.spawn_zombie.pick_random()
 	var z: Zombie = ZOMBIE.instantiate()
 	z.mondo = mondo
+	# ogni zombie ha un obiettivo preciso: cosi' l'ondata si divide sui tre poli
+	# invece di ammassarsi tutta sulla stessa porta
+	var poli := get_tree().get_nodes_in_group("edificio").filter(func(e): return e.in_piedi)
+	if not poli.is_empty():
+		z.edificio_bersaglio = poli.pick_random()
 	z.global_position = mondo.centro(cella) + Vector2(randf_range(-24, 24), randf_range(-16, 16))
 	_zombie.add_child(z)
 

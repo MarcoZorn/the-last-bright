@@ -24,7 +24,7 @@ func _process(_delta: float) -> bool:
 
 	assert(mondo.percorso(spawn, piazza).is_empty(), "barricate in piedi: non deve esistere un percorso")
 	for b in barricate:
-		b.danneggia(Balance.BARRICATA_VITA)
+		b.subisci(Balance.BARRICATA_VITA)
 	assert(not mondo.percorso(spawn, piazza).is_empty(), "barricate cadute: il percorso deve aprirsi")
 	for b in barricate:
 		b.ripara(Balance.BARRICATA_VITA)
