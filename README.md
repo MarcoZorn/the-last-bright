@@ -14,13 +14,28 @@ prima di affrontare il 3D in terza persona.
 godot --path .            # oppure apri il progetto nell'editor
 ```
 
-WASD per muoversi, **E** ripara la barricata piu' vicina, **Q** piazza un posto
-di guardia. Il giorno dura 45 secondi, poi arriva la notte.
+| tasto | cosa fa |
+|---|---|
+| WASD / frecce | muovi il tuo leader |
+| SPAZIO | fendente frontale: colpisce quello che hai davanti |
+| E | ripara la barricata piu' vicina (costa denaro) |
+| Q | recluta una guardia dove sei (costa denaro) |
+| click sinistro | seleziona una guardia |
+| click destro | manda li' la guardia selezionata |
+
+Il giorno dura 45 secondi: incassi le tasse all'alba, ripari, recluti. Poi e'
+notte e arrivano dal ponte a nord. Ogni notte sono di piu'.
+
+Il tuo leader non e' un soldato: il fendente serve a toglierti dai guai, non a
+reggere un'ondata. Per quello servono le guardie, e le guardie costano.
+Se cadi non sei eliminato -- ti rialzi in piazza dopo qualche secondo, ma la
+citta' ti ha visto cadere e il morale ne risente.
 
 ## Come e' fatto
 
 Stato attuale: ciclo giorno/notte, ondate crescenti, barricate distruttibili e
-riparabili, posti di guardia, tre risorse che si influenzano a vicenda.
+riparabili, guardie che si comandano col mouse, i tre edifici delle fazioni come
+bersagli veri, combattimento corpo a corpo.
 Ancora da fare: multiplayer, loop politico, ribelle in stealth, spedizioni.
 
 Una cosa da capire prima di toccare il codice: **gli zombie non inseguono
