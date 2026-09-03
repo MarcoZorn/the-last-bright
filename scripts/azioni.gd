@@ -14,6 +14,11 @@ var _ricarica := {}   # id azione -> secondi rimanenti
 func _ready() -> void:
 	istanza = self
 
+## Senza questo, dopo un ritorno al menu `istanza` punta a un nodo liberato.
+func _exit_tree() -> void:
+	if istanza == self:
+		istanza = null
+
 func _process(delta: float) -> void:
 	for chiave in _ricarica:
 		if _ricarica[chiave] > 0.0:
@@ -75,7 +80,6 @@ func esegui(id: String, esecutore := -99) -> bool:
 	if a.has("speciale"):
 		_speciale(a["speciale"], esecutore)
 	Audio.suona("azione", -10.0)
-	GameState.cambiato.emit()
 	return true
 
 func _trova(id: String) -> Dictionary:

@@ -32,7 +32,6 @@ var zombie_uccisi: int = 0
 var finita := false
 var vinta := false
 
-signal cambiato
 signal fase_cambiata(nuova: Fase)
 signal annuncio(testo: String, colore: Color)
 
@@ -48,7 +47,6 @@ func modifica(campo: String, delta: float) -> void:
 	# tasse dell'alba lo leggevano grezzo, moltiplicando il gettito
 	var tetto := 100.0 if campo == "morale" else 9999.0
 	set(campo, clampf(get(campo) + delta, 0.0, tetto))
-	cambiato.emit()
 
 func costo_addestramento() -> float:
 	return Balance.GUARDIA_ADDESTRAMENTO_COSTO * pow(2.0, addestramenti)
@@ -61,7 +59,6 @@ func cambia_fase(nuova: Fase) -> void:
 		azioni_usate = [0, 0, 0, 0]
 		_alba()
 	fase_cambiata.emit(nuova)
-	cambiato.emit()
 
 ## L'alba e' il momento in cui la citta' fa i conti: incassa, mangia, e ridistribuisce
 ## il potere in base a chi ha effettivamente tenuto in piedi la baracca.
@@ -122,7 +119,6 @@ func sposta_potere(da: int, a: int, quanto: float) -> void:
 	if a >= 0 and a < 3:
 		potere[a] += quanto
 	normalizza_potere()
-	cambiato.emit()
 
 ## Un leader che perde il potere non e' eliminato: passa dall'altra parte.
 func _controlla_golpe() -> void:
@@ -149,7 +145,6 @@ func perdi_abitanti(quanti: int) -> void:
 	morale = maxf(morale - quanti * Balance.MORALE_PER_ABITANTE_PERSO, 0.0)
 	if popolazione == 0:
 		finita = true
-	cambiato.emit()
 
 ## Rimette tutto come all'inizio: l'autoload sopravvive al cambio scena, quindi
 ## senza questo la seconda partita partirebbe con lo stato della prima.

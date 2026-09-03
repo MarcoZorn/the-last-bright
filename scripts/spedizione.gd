@@ -11,11 +11,15 @@ func _ready() -> void:
 	in_corso += 1
 	GameState.annuncio.emit("Spedizione partita", Color(0.8, 0.9, 1))
 
+## Il decremento sta qui e non in _process: se la scena cambia mentre una
+## spedizione e' in volo, il conteggio resterebbe alto per sempre.
+func _exit_tree() -> void:
+	in_corso -= 1
+
 func _process(delta: float) -> void:
 	rimanente -= delta
 	if rimanente > 0.0:
 		return
-	in_corso -= 1
 	if randf() < Balance.SPEDIZIONE_RISCHIO:
 		GameState.modifica("morale", -8.0)
 		GameState.annuncio.emit("La spedizione non e' tornata", Color(1, 0.5, 0.4))
