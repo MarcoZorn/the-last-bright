@@ -10,13 +10,18 @@ const DENARO_INIZIALE := 120.0
 const VIVERI_INIZIALI := 200.0
 const POPOLAZIONE_INIZIALE := 120
 
+## Quante azioni puo' spendere una fazione in un giorno. E' l'unico vero costo
+## opportunita' del gioco: senza, la strategia ottima e' premere ogni tasto
+## appena si illumina, e nessuna scelta e' una scelta.
+const AZIONI_PER_GIORNO := 3
+
 # --- ritmo: i primi giorni sono corti, poi si allungano ---
 const GIORNO_BASE := 15.0
 const GIORNO_CRESCITA := 3.0       # secondi in piu' per ogni giorno passato
 const GIORNO_MAX := 45.0
 ## L'alba arriva comunque: senza, bastava uno zombie incastrato per bloccare
 ## la partita in eterno.
-const NOTTE_BASE := 40.0
+const NOTTE_BASE := 75.0
 const NOTTE_CRESCITA := 6.0
 const NOTTE_MAX := 120.0
 const GIORNI_PER_VINCERE := 10
@@ -55,8 +60,9 @@ const SPINTA_COLPO := 110.0
 
 # --- barricate ---
 const BARRICATA_VITA := 200.0
-const BARRICATA_DANNO := 1.5
+const BARRICATA_DANNO := 3.0
 const RIPARA_QUANTITA := 40.0
+const RINFORZA_QUOTA := 0.34        # quanto ripara "Rinforza mura", in frazione del massimo
 const RIPARA_COSTO := 8.0
 
 # --- guardie: partono da recluta scarsa, si migliorano a pagamento ---
@@ -70,8 +76,8 @@ const GUARDIA_ADDESTRAMENTO_COSTO := 70.0   # per il primo livello, poi raddoppi
 ## bilancio dell'Esercito, non un regalo.
 const GUARDIA_VITA := [55.0, 80.0, 110.0, 150.0]
 const GUARDIA_RAGGIO := [58.0, 70.0, 82.0, 96.0]
-const GUARDIA_CADENZA := [1.6, 1.25, 0.95, 0.7]
-const PROIETTILE_DANNO := [0.8, 1.2, 1.7, 2.4]
+const GUARDIA_CADENZA := [1.1, 0.95, 0.8, 0.65]
+const PROIETTILE_DANNO := [2.0, 2.8, 3.6, 4.8]
 
 # --- edifici delle fazioni ---
 const EDIFICIO_VITA := 400.0
@@ -81,7 +87,7 @@ const EDIFICIO_CADUTO_ABITANTI := 20
 # --- economia dell'alba ---
 const TASSE_PER_ABITANTE := 0.60
 const TASSE_PESO_MORALE := 0.01
-const VIVERI_PER_ABITANTE := 0.35   # quanto mangia la citta' ogni giorno
+const VIVERI_PER_ABITANTE := 0.55   # quanto mangia la citta' ogni giorno
 const FAME_MORALE := 12.0           # morale perso quando i viveri finiscono
 const FAME_ABITANTI := 6
 const MORALE_PER_ABITANTE_PERSO := 0.8
@@ -92,13 +98,16 @@ const ABITANTI_PERSI_PER_ZOMBIE := 2
 #     potere significa per forza toglierlo a qualcun altro ---
 const POTERE_SOGLIA_GOLPE := 12.0   # sotto questa quota vieni deposto
 const POTERE_SOGLIA_RITORNO := 36.0 # il ribelle che la supera si riprende il potere
-const POTERE_SPINTA_MORALE := 0.10  # quanto il morale alto premia la Chiesa
-const POTERE_SPINTA_DENARO := 0.04  # quanto le casse piene premiano il Governo
-const POTERE_SPINTA_MURA := 0.10    # quanto le mura intatte premiano l'Esercito
+## Quanto in fretta il consenso segue i risultati. 0 = immobile, 1 = solo l'ultimo
+## giorno conta. A 0.35 servono tre o quattro giorni storti per rischiare il golpe:
+## abbastanza da accorgersene e correre ai ripari.
+const POTERE_INERZIA := 0.35
+const DENARO_PIENO := 400.0         # casse a questa cifra = merito pieno del Governo
+const VIVERI_PIENI := 500.0
 
 # --- spedizioni fuori le mura ---
 const SPEDIZIONE_DURATA := 22.0
-const SPEDIZIONE_BOTTINO_DENARO := 55.0
+const SPEDIZIONE_BOTTINO_DENARO := 30.0
 const SPEDIZIONE_BOTTINO_VIVERI := 70.0
 const SPEDIZIONE_RISCHIO := 0.28    # probabilita' di non tornare
 
@@ -117,14 +126,14 @@ const AZIONI := [
 	{"id": "tassa", "fazione": 1, "nome": "Tassa straord.", "ricarica": 16.0,
 		"effetti": {"denaro": 45.0, "morale": -9.0}, "desc": "Soldi subito, malcontento subito"},
 	{"id": "razionamento", "fazione": 1, "nome": "Razionamento", "ricarica": 22.0,
-		"effetti": {"viveri": 45.0, "morale": -7.0}, "desc": "Allunga le scorte affamando la gente"},
+		"effetti": {"viveri": 30.0, "morale": -7.0}, "desc": "Allunga le scorte affamando la gente"},
 	{"id": "decreto", "fazione": 1, "nome": "Decreto", "ricarica": 38.0,
 		"effetti": {"morale": -5.0}, "speciale": "decreto",
 		"desc": "Un colpo di mano legale: piu' potere al Governo"},
 
-	{"id": "rinforza", "fazione": 2, "nome": "Rinforza mura", "ricarica": 14.0,
-		"effetti": {"denaro": -30.0}, "speciale": "ripara_tutto",
-		"desc": "Ripara ogni barricata della citta'"},
+	{"id": "rinforza", "fazione": 2, "nome": "Rinforza mura", "ricarica": 26.0,
+		"effetti": {"denaro": -45.0}, "speciale": "ripara_tutto",
+		"desc": "Rimette in sesto un terzo della vita di ogni barricata"},
 	{"id": "coprifuoco", "fazione": 2, "nome": "Coprifuoco", "ricarica": 30.0,
 		"effetti": {"morale": -8.0}, "speciale": "coprifuoco",
 		"desc": "Ordine e disciplina: piu' potere all'Esercito"},
@@ -138,13 +147,13 @@ const AZIONI := [
 		"effetti": {"denaro": -35.0, "morale": -4.0}, "speciale": "leva",
 		"desc": "Due guardie subito, arruolate a forza"},
 
-	{"id": "sabotaggio", "fazione": 3, "nome": "Sabotaggio", "ricarica": 26.0,
+	{"id": "sabotaggio", "fazione": 3, "nome": "Sabotaggio", "ricarica": 40.0,
 		"effetti": {}, "speciale": "sabota",
 		"desc": "Indebolisci una barricata di nascosto: l'Esercito ci fara' brutta figura"},
-	{"id": "voci", "fazione": 3, "nome": "Diffondi voci", "ricarica": 22.0,
+	{"id": "voci", "fazione": 3, "nome": "Diffondi voci", "ricarica": 40.0,
 		"effetti": {"morale": -10.0}, "speciale": "voci",
 		"desc": "Screditi la Chiesa e ti riprendi consenso"},
-	{"id": "furto", "fazione": 3, "nome": "Furto", "ricarica": 24.0,
+	{"id": "furto", "fazione": 3, "nome": "Furto", "ricarica": 40.0,
 		"effetti": {}, "speciale": "furto",
 		"desc": "Svuoti le casse del Governo e ti finanzi"},
 

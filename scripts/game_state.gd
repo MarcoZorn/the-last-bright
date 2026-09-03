@@ -21,6 +21,8 @@ var deposta: int = -1                         # fazione ribelle, -1 se nessuna
 var fazione_giocatore: int = 0
 var senza_umano := false     # simulazione: l'IA guida tutte e tre le fazioni
 var livello_guardie: int = 0
+## Budget di azioni della giornata, una casella per fazione (3 = ribelle).
+var azioni_usate: Array[int] = [0, 0, 0, 0]
 var addestramenti: int = 0
 
 var fase: Fase = Fase.GIORNO
@@ -42,7 +44,10 @@ func fazione_effettiva() -> int:
 	return Faction.RIBELLE if deposta == fazione_giocatore else fazione_giocatore
 
 func modifica(campo: String, delta: float) -> void:
-	set(campo, clampf(get(campo) + delta, 0.0, 9999.0))
+	# il morale ha un tetto vero: senza, si accumulava oltre 100 di notte e le
+	# tasse dell'alba lo leggevano grezzo, moltiplicando il gettito
+	var tetto := 100.0 if campo == "morale" else 9999.0
+	set(campo, clampf(get(campo) + delta, 0.0, tetto))
 	cambiato.emit()
 
 func costo_addestramento() -> float:
@@ -53,6 +58,7 @@ func cambia_fase(nuova: Fase) -> void:
 	tempo_fase = 0.0
 	if nuova == Fase.GIORNO:
 		giorno += 1
+		azioni_usate = [0, 0, 0, 0]
 		_alba()
 	fase_cambiata.emit(nuova)
 	cambiato.emit()
@@ -84,10 +90,22 @@ func gettito_atteso() -> float:
 	return popolazione * Balance.TASSE_PER_ABITANTE * (morale * Balance.TASSE_PESO_MORALE)
 
 
+## Il consenso e' la QUOTA di risultati che porti a casa, non un bonus additivo.
+## La versione additiva veniva riassorbita dalla normalizzazione a ogni alba:
+## in cinque partite simulate il golpe non scattava mai, nemmeno col morale a 10.
+## Cosi' invece una fazione che smette di produrre converge davvero verso zero.
 func _ridistribuisci_potere() -> void:
-	potere[0] += (morale - 50.0) * Balance.POTERE_SPINTA_MORALE
-	potere[1] += (denaro - 100.0) * Balance.POTERE_SPINTA_DENARO
-	potere[2] += (sicurezza - 50.0) * Balance.POTERE_SPINTA_MURA
+	var contributi := [
+		morale,                                                            # Chiesa
+		(clampf(denaro / Balance.DENARO_PIENO, 0.0, 1.0) * 0.6
+			+ clampf(viveri / Balance.VIVERI_PIENI, 0.0, 1.0) * 0.4) * 100.0,   # Governo
+		sicurezza,                                                         # Esercito
+	]
+	var totale: float = contributi[0] + contributi[1] + contributi[2]
+	if totale <= 0.0:
+		return
+	for i in 3:
+		potere[i] = lerpf(potere[i], contributi[i] * 100.0 / totale, Balance.POTERE_INERZIA)
 	normalizza_potere()
 
 func normalizza_potere() -> void:
@@ -145,6 +163,7 @@ func ripristina() -> void:
 	deposta = -1
 	livello_guardie = 0
 	addestramenti = 0
+	azioni_usate = [0, 0, 0, 0]
 	fase = Fase.GIORNO
 	giorno = 1
 	tempo_fase = 0.0
