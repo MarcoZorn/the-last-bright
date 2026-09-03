@@ -69,6 +69,10 @@ func eseguibile(id: String, esecutore := -99) -> bool:
 func esegui(id: String, esecutore := -99) -> bool:
 	if esecutore == -99:
 		esecutore = GameState.fazione_effettiva()
+	# un client non applica niente da solo: chiede, e il server decide
+	if Rete.in_rete and not multiplayer.is_server():
+		_chiedi.rpc_id(1, id, esecutore)
+		return true
 	if not eseguibile(id, esecutore):
 		Audio.suona("negato", -12.0)
 		return false
@@ -81,6 +85,18 @@ func esegui(id: String, esecutore := -99) -> bool:
 		_speciale(a["speciale"], esecutore)
 	Audio.suona("azione", -10.0)
 	return true
+
+@rpc("any_peer", "call_remote", "reliable")
+func _chiedi(id: String, esecutore: int) -> void:
+	# il mittente non puo' spacciarsi per un'altra fazione
+	var chi: int = Rete.fazioni.get(multiplayer.get_remote_sender_id(), -1)
+	if chi < 0:
+		return
+	if GameState.deposta == chi:
+		chi = GameState.Faction.RIBELLE
+	if chi != esecutore:
+		return
+	esegui(id, esecutore)
 
 func _trova(id: String) -> Dictionary:
 	for a in Balance.AZIONI:
