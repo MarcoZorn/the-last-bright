@@ -143,7 +143,9 @@ func _presidia(delta: float) -> void:
 		if d < d_min:
 			d_min = d
 			meta = b
-	if meta != null and meta.distanza(global_position) > Balance.GUARDIA_RAGGIO[GameState.livello_guardie] * 0.7:
+	# addosso al muro, non "a portata": lo zombie morde dall'altro lato a 22px,
+	# fermarsi a 41 metteva la guardia a 63px dal bersaglio, appena fuori tiro
+	if meta != null and meta.distanza(global_position) > Balance.TILE * 1.2:
 		vai_a(meta.punto_approccio(global_position))
 
 func _piu_vicino() -> Node2D:
