@@ -176,7 +176,8 @@ func _registra_tasti() -> void:
 	var extra := {"ripara": KEY_E, "costruisci": KEY_Q, "attacca": KEY_SPACE,
 		"azione_1": KEY_1, "azione_2": KEY_2, "azione_3": KEY_3, "azione_4": KEY_4, "azione_5": KEY_5, "azione_6": KEY_6,
 		"fazione_1": KEY_F1, "fazione_2": KEY_F2, "fazione_3": KEY_F3,
-		"ricomincia": KEY_R, "manuale": KEY_H}
+		"ricomincia": KEY_R, "manuale": KEY_H,
+		"ospita": KEY_O, "unisciti": KEY_U}
 	for nome in extra:
 		if not InputMap.has_action(nome):
 			InputMap.add_action(nome)
