@@ -11,6 +11,7 @@ var _da_spawnare := 0
 var _prossimo_spawn := 0.0
 var _vita_totale_barricate := 0.0
 var _luce: CanvasModulate
+var _guardie: Node2D
 
 func _ready() -> void:
 	mondo = preload("res://scripts/world.gd").new()
@@ -37,8 +38,9 @@ func _ready() -> void:
 
 	_zombie = Node2D.new()
 	add_child(_zombie)
-	var guardie := Node2D.new()
-	add_child(guardie)
+	_guardie = Node2D.new()
+	add_child(_guardie)
+	var guardie := _guardie
 
 	var azioni := Azioni.new()
 	azioni.mondo = mondo
@@ -51,12 +53,21 @@ func _ready() -> void:
 		ia.fazione = f
 		add_child(ia)
 
-	var p: Player = PLAYER.instantiate()
-	p.fazione = GameState.fazione_giocatore
-	p.global_position = mondo.piazza_centro()
-	p.mondo = mondo
-	p.guardie = guardie
-	add_child(p)
+	var giocatori := Node2D.new()
+	giocatori.name = "Giocatori"
+	add_child(giocatori)
+	var generatore := MultiplayerSpawner.new()
+	generatore.add_spawnable_scene("res://scenes/player.tscn")
+	add_child(generatore)
+	# spawn_path va calcolato DOPO l'ingresso nell'albero, altrimenti i due nodi
+	# non hanno ancora un antenato comune
+	generatore.spawn_path = generatore.get_path_to(giocatori)
+
+	if not Rete.in_rete:
+		_crea_leader(giocatori, 1, GameState.fazione_giocatore)
+	elif multiplayer.is_server():
+		for id in Rete.fazioni:
+			_crea_leader(giocatori, id, Rete.fazioni[id])
 
 	_luce = CanvasModulate.new()
 	_luce.color = Color.WHITE
@@ -67,18 +78,33 @@ func _ready() -> void:
 
 	if "--esercito" in OS.get_cmdline_user_args():
 		GameState.fazione_giocatore = 2
-		p.fazione = 2
-		p._vesti(2)
+		var mio_leader: Player = get_tree().get_first_node_in_group("mio")
+		if mio_leader != null:
+			mio_leader.fazione = 2
+			mio_leader._vesti(2)
 		for i in 4:
 			Azioni.istanza._recluta(mondo.piazza_centro() + Vector2(randf_range(-40, 40), randf_range(-40, 40)))
+	if Rete.in_rete:
+		print("[rete] partita avviata, sono %d, fazione %s" % [
+			multiplayer.get_unique_id(), GameState.NOMI[GameState.fazione_giocatore]])
+		await get_tree().create_timer(3.0).timeout
+		print("[rete] leader in scena: %d" % giocatori.get_child_count())
 	if "--shot" in OS.get_cmdline_user_args():
 		_scatta_panoramica()
+
+func _crea_leader(dove: Node2D, peer: int, fazione: int) -> void:
+	var p: Player = PLAYER.instantiate()
+	p.name = "%d_%d" % [peer, fazione]
+	p.mondo = mondo
+	p.guardie = _guardie
+	p.position = mondo.piazza_centro() + Vector2(randf_range(-24, 24), randf_range(-24, 24))
+	dove.add_child(p, true)
 
 ## Selezione e ordini alle guardie: sinistro seleziona, destro manda.
 func _unhandled_input(evento: InputEvent) -> void:
 	if not (evento is InputEventMouseButton and evento.pressed):
 		return
-	var mio: Player = get_tree().get_first_node_in_group("player")
+	var mio: Player = get_tree().get_first_node_in_group("mio")
 	if mio == null or not mio.is_multiplayer_authority():
 		return
 	var punto := get_global_mouse_position()

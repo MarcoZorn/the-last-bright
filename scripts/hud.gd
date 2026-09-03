@@ -136,7 +136,7 @@ func _process(_d: float) -> void:
 	_aggiorna_stato()
 	_aggiorna_potere()
 	_aggiorna_azioni()
-	var g: Player = get_tree().get_first_node_in_group("player")
+	var g: Player = get_tree().get_first_node_in_group("mio")
 	if g != null:
 		var quota: float = g.vita / Balance.PLAYER_VITA
 		_vita.size.x = 178.0 * quota

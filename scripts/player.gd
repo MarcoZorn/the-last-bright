@@ -22,8 +22,20 @@ var _cooldown := 0.0
 var _rialzo := 0.0
 var _tempo := 0.0
 
+## L'autorita' va decisa in _enter_tree: se la si cambia in _ready il
+## MultiplayerSynchronizer e' gia' partito senza id di rete e si lamenta.
+## In rete il nodo si chiama "<peer>_<fazione>": e' il modo piu' corto per far
+## sapere a ogni client chi comanda questo leader e di che fazione e'.
+func _enter_tree() -> void:
+	if Rete.in_rete:
+		var pezzi := String(name).split("_")
+		set_multiplayer_authority(pezzi[0].to_int())
+		fazione = pezzi[1].to_int()
+
 func _ready() -> void:
 	add_to_group("player")
+	if is_multiplayer_authority():
+		add_to_group("mio")
 	add_to_group("danneggiabile")
 	_vesti(fazione)
 	Grafica.ombra(self, 5.0)
