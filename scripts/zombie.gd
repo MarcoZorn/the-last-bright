@@ -32,10 +32,11 @@ func _ready() -> void:
 	vita = vita_max
 	velocita = Balance.zombie_velocita(GameState.giorno)
 	Grafica.ombra(self, 4.5)
-	# ogni zombie e' un po' diverso dagli altri: senza, l'ondata sembra un plotone
+	# tre varianti disegnate a mano invece di una sola tinta a caso: da lontano
+	# l'ondata non sembra un plotone di cloni
 	var sprite: Sprite2D = $Sprite2D
-	sprite.modulate = Color(randf_range(0.5, 0.75), randf_range(0.85, 1.0), randf_range(0.5, 0.7))
-	scale = Vector2.ONE * randf_range(0.88, 1.12)
+	sprite.region_rect = Rect2((4 + randi() % 3) * Balance.TILE, 0, Balance.TILE, Balance.TILE)
+	scale = Vector2.ONE * randf_range(0.9, 1.1)
 	velocita *= randf_range(0.9, 1.1)
 	_barra = BarraVita.new(12.0, 10.0)
 	add_child(_barra)
@@ -140,9 +141,8 @@ func subisci(danno: float, spinta := Vector2.ZERO) -> void:
 	_barra.aggiorna(vita / vita_max)
 	_spinta = spinta.normalized() * Balance.SPINTA_COLPO
 	DannoFluttuante.mostra(get_parent(), global_position, str(ceili(danno)), Color(1, 0.9, 0.5))
-	var tinta: Color = $Sprite2D.modulate
-	$Sprite2D.modulate = Color(1.0, 0.45, 0.45)
-	create_tween().tween_property($Sprite2D, "modulate", tinta, 0.15)
+	$Sprite2D.modulate = Color(1.6, 0.7, 0.7)
+	create_tween().tween_property($Sprite2D, "modulate", Color.WHITE, 0.15)
 	if vita <= 0.0:
 		_muori()
 
