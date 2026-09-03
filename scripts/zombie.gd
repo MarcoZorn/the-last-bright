@@ -18,6 +18,11 @@ var _fra_ricalcoli := 0.0
 var _spinta := Vector2.ZERO
 var _tempo := 0.0
 var _ultima_posizione := Vector2.ZERO
+
+## Il gruppo dei bersagli veniva interrogato da ogni zombie a ogni frame fisico:
+## con cento zombie sono seimila query al secondo. Lo si legge una volta a frame.
+static var _prede_frame := -1
+static var _prede: Array = []
 var _fermo_da := 0.0
 
 var _barra: BarraVita
@@ -87,10 +92,14 @@ func _sblocca(delta: float) -> void:
 
 ## Mordono qualunque cosa gli capiti a tiro: muri, guardie, leader, edifici.
 func _preda_a_portata() -> Node2D:
+	var frame := Engine.get_physics_frames()
+	if frame != _prede_frame:
+		_prede_frame = frame
+		_prede = get_tree().get_nodes_in_group("danneggiabile")
 	var migliore: Node2D = null
 	var d_min := Balance.TILE * 1.4
-	for n in get_tree().get_nodes_in_group("danneggiabile"):
-		if not n.attaccabile():
+	for n in _prede:
+		if not is_instance_valid(n) or not n.attaccabile():
 			continue
 		var d: float = n.distanza(global_position)
 		if d < d_min:
