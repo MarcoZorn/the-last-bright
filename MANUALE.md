@@ -32,11 +32,17 @@ sta fuori dalle mura: sta dall'altra parte della piazza.
 ## Il ciclo
 
 **Giorno** — 15 secondi il primo giorno, +3 ogni giorno fino a 45. Incassi le
-tasse all'alba, ripari le mura, recluti, mandi spedizioni, e usi le azioni della
-tua fazione per portarti a casa consenso.
+tasse all'alba, ripari le mura, recluti, mandi spedizioni.
+
+**Hai tre azioni al giorno, e solo di giorno.** Le azioni della barra (1-6)
+si spendono da un budget che si ricarica ogni alba, e di notte sono spente: la
+notte si sopravvive, non si legifera. Questo e' il vero costo del gioco --
+Predica *invece di* Processione e' una scelta, non "tutte e due".
 
 **Notte** — arrivano. La notte finisce quando li hai ripuliti tutti, oppure
-all'alba: il sole sorge comunque e brucia quelli rimasti.
+all'alba: il sole sorge comunque e brucia quelli rimasti. Ma non gratis: **ogni
+zombie ancora dentro le mura all'alba si e' portato via un abitante.** Lasciarne
+venti dentro e aspettare il sole costa venti persone.
 
 **I fronti si aprono col tempo.** I primi quattro giorni arrivano solo dal ponte
 a nord: un fronte solo, impari a tenerlo. Dal **giorno 5** anche dai fianchi. Dal
@@ -95,7 +101,7 @@ soldi che non sono suoi: ogni reclutamento e' una trattativa col Governo.
 
 | azione | effetto |
 |---|---|
-| Rinforza mura | ripara ogni barricata della citta', -30$ |
+| Rinforza mura | rimette un terzo della vita a ogni barricata ancora in piedi, -45$ |
 | Coprifuoco | +6 punti di potere all'Esercito, -8 morale |
 | Addestramento | tutte le guardie salgono di livello. **Raddoppia di prezzo ogni volta** |
 | Licenzia | congeda la guardia selezionata, +20$ |
@@ -110,7 +116,7 @@ soldi che non sono suoi: ogni reclutamento e' una trattativa col Governo.
 | Furto | -40$ al Governo, +5 punti di potere a te |
 
 **Spedizione** ce l'hanno tutti: mandi qualcuno oltre le mura, torna dopo 22
-secondi con 55$ e 70 viveri. Il **28% delle volte non torna**, e il morale scende.
+secondi con 30$ e 70 viveri. Il **28% delle volte non torna**, e il morale scende.
 
 ---
 
@@ -124,9 +130,10 @@ spedizione. Tienile in movimento.
 gettito. Morale a terra = citta' povera = niente guardie = mura che cadono.
 Tutto si tiene.
 
-**Le guardie da sole.** Una recluta ha 55 di vita e spara piano. Quattro reclute
-sparse non fermano niente; quattro reclute nello stesso punto sono un muro di
-fuoco. Muovile insieme.
+**Le guardie da sole.** Una recluta ha 55 di vita. Da sola perde contro tre
+zombie; quattro nello stesso punto sono un muro di fuoco. Muovile insieme, e
+ricordati che l'addestramento vale piu' del numero: una guardia di livello 3
+spara il triplo di una recluta e costa un solo posto da difendere.
 
 **Guardare dalla parte sbagliata.** La mappa e' piu' grande dello schermo. Le
 **frecce rosse** ai bordi ti dicono quale varco sta cedendo mentre tu sei

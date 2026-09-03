@@ -93,6 +93,8 @@ func _costruisci_manuale() -> void:
   Governi una citta'-stato assediata insieme ad altre due fazioni.
   Di giorno decidi, di notte reggi. Reggi 10 giorni e hai vinto.
 
+  Hai TRE AZIONI AL GIORNO, e solo di giorno: la notte si sopravvive.
+
   MUOVERSI      WASD          SPAZIO fendente frontale
   MURA          E ripara la barricata piu' vicina
   GUARDIE       Q recluta   click sx seleziona   click dx mandala li'
@@ -116,6 +118,11 @@ func _costruisci_manuale() -> void:
   La citta' mangia ogni giorno. Se restate a zero la gente muore di fame.
   L'unico modo di farne entrare e' la SPEDIZIONE, che il 28% delle volte
   non torna.
+
+  LA NOTTE HA UNA POSTA
+  All'alba il sole brucia gli zombie rimasti, ma ognuno che e' riuscito a
+  entrare dentro le mura si e' gia' portato via un abitante. Scappare e
+  aspettare il sole non e' gratis.
 
   L'ASSEDIO
   Gli zombie non ti inseguono: puntano ai tre edifici. Finche' le barricate
@@ -185,6 +192,7 @@ func _aggiorna_azioni() -> void:
 	if mia != _fazione_mostrata:
 		_fazione_mostrata = mia
 		for c in _barra_azioni.get_children():
+			_barra_azioni.remove_child(c)   # queue_free() da solo non lo toglie subito
 			c.queue_free()
 		var elenco := Azioni.istanza.per_fazione(mia)
 		for i in mini(elenco.size(), 6):
