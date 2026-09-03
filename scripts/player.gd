@@ -46,6 +46,8 @@ func _physics_process(delta: float) -> void:
 		_direzione = dir
 	velocity = dir * Balance.PLAYER_SPEED
 	move_and_slide()
+	_tempo += delta
+	Grafica.passo($Sprite2D, velocity, _tempo)   # era l'unico a non camminare
 
 	if Input.is_action_pressed("attacca") and _cooldown <= 0.0:
 		_attacca()
