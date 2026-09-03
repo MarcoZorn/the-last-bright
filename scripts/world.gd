@@ -48,6 +48,7 @@ var piazza: Array[Vector2i] = []
 
 var varchi: Array = []          # gruppi contigui di celle "+": ogni gruppo e' una barricata
 var edifici := {}               # carattere "C"/"G"/"A" -> celle di quell'edificio
+var dentro_le_mura := Rect2()   # area della piazza fortificata, in pixel
 
 var _solidi_extra := {}         # celle rese solide a runtime (barricate in piedi)
 var _astar := AStarGrid2D.new()
@@ -64,6 +65,7 @@ func _ready() -> void:
 	_crea_collisioni()
 	_prepara_astar()
 	varchi = _raggruppa(porte)
+	_calcola_mura()
 	for ch in ["C", "G", "A"]:
 		edifici[ch] = _celle_con(ch)
 
@@ -198,6 +200,33 @@ func _faccia_muro(x: int, y: int) -> Vector2i:
 	if su or giu:
 		return MURO["sinistra"] if a_sinistra else MURO["destra"]
 	return MURO["alto"] if sopra else MURO["basso"]
+
+## Riquadro della piazza fortificata. Non si puo' ricavare dal "gruppo di muri
+## piu' grande": le quattro porte spezzano il perimetro in archi separati.
+## Si parte invece dalla piazza e si allaga verso l'esterno trattando muri E
+## varchi come barriere: quello che resta bagnato e' l'interno, comunque siano
+## disposte le porte.
+func _calcola_mura() -> void:
+	if piazza.is_empty():
+		return
+	var visti := {piazza[0]: true}
+	var coda: Array[Vector2i] = [piazza[0]]
+	var minimo: Vector2i = piazza[0]
+	var massimo: Vector2i = piazza[0]
+	while not coda.is_empty():
+		var c: Vector2i = coda.pop_back()
+		minimo = minimo.min(c)
+		massimo = massimo.max(c)
+		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var n: Vector2i = c + d
+			if visti.has(n) or n.x < 0 or n.y < 0 or n.x >= larghezza or n.y >= altezza:
+				continue
+			var ch := carattere(n)
+			if ch == "#" or ch == "+":
+				continue
+			visti[n] = true
+			coda.append(n)
+	dentro_le_mura = Rect2(Vector2(minimo) * T, Vector2(massimo - minimo + Vector2i.ONE) * T)
 
 func _celle_con(ch: String) -> Array[Vector2i]:
 	var fuori: Array[Vector2i] = []

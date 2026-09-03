@@ -29,5 +29,15 @@ func _ready() -> void:
 		b.ripara(Balance.BARRICATA_VITA)
 	assert(mondo.percorso(spawn, piazza).is_empty(), "barricate riparate: il percorso deve richiudersi")
 
+	# il riquadro delle mura decide chi si e' portato via un abitante all'alba:
+	# se fosse degenere la notte tornerebbe gratis senza che nessuno se ne accorga
+	print("   mura=%s  piazza=%s dentro=%s  spawn=%s dentro=%s" % [
+		mondo.dentro_le_mura, piazza, mondo.dentro_le_mura.has_point(piazza),
+		spawn, mondo.dentro_le_mura.has_point(spawn)])
+	assert(mondo.dentro_le_mura.get_area() > 0.0, "il riquadro delle mura e' vuoto")
+	assert(mondo.dentro_le_mura.has_point(piazza), "la piazza deve stare dentro le mura")
+	assert(not mondo.dentro_le_mura.has_point(spawn), "lo spawn a nord deve stare fuori")
+	print("OK mura")
+
 	print("OK assedio: %d varchi chiudono, cadono e si richiudono" % barricate.size())
 	get_tree().quit()
