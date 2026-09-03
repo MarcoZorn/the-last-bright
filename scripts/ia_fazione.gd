@@ -17,6 +17,7 @@ func _process(delta: float) -> void:
 		return
 	_fra_mosse = randf_range(2.5, 5.0)
 	var mia := GameState.Faction.RIBELLE if GameState.deposta == fazione else fazione
-	var pronte := Azioni.istanza.per_fazione(mia).filter(func(a): return Azioni.istanza.eseguibile(a["id"]))
+	var pronte := Azioni.istanza.per_fazione(mia).filter(
+		func(a): return Azioni.istanza.eseguibile(a["id"], mia))
 	if not pronte.is_empty():
-		Azioni.istanza.esegui(pronte.pick_random()["id"])
+		Azioni.istanza.esegui(pronte.pick_random()["id"], mia)

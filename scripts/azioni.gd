@@ -13,26 +13,42 @@ var _ricarica := {}   # id azione -> secondi rimanenti
 
 func _ready() -> void:
 	istanza = self
-	for a in Balance.AZIONI:
-		_ricarica[a["id"]] = 0.0
 
 func _process(delta: float) -> void:
-	for id in _ricarica:
-		if _ricarica[id] > 0.0:
-			_ricarica[id] = maxf(_ricarica[id] - delta, 0.0)
+	for chiave in _ricarica:
+		if _ricarica[chiave] > 0.0:
+			_ricarica[chiave] = maxf(_ricarica[chiave] - delta, 0.0)
 
 func per_fazione(fazione: int) -> Array:
 	return Balance.AZIONI.filter(func(a): return a["fazione"] == fazione or a["fazione"] == -1)
 
-func quota_ricarica(id: String) -> float:
+## La ricarica e' per fazione: prima la Spedizione aveva una chiave sola per
+## tutti e tre, quindi quando la lanciava un'IA il tuo tasto si spegneva.
+func _chiave(id: String, esecutore: int) -> String:
+	return "%s:%d" % [id, esecutore]
+
+func quota_ricarica(id: String, esecutore := -99) -> float:
+	if esecutore == -99:
+		esecutore = GameState.fazione_effettiva()
 	var a := _trova(id)
 	if a.is_empty() or a["ricarica"] <= 0.0:
 		return 0.0
-	return _ricarica[id] / a["ricarica"]
+	return float(_ricarica.get(_chiave(id, esecutore), 0.0)) / a["ricarica"]
 
-func eseguibile(id: String) -> bool:
+func azioni_rimaste(esecutore: int) -> int:
+	return Balance.AZIONI_PER_GIORNO - GameState.azioni_usate[esecutore]
+
+func eseguibile(id: String, esecutore := -99) -> bool:
+	if esecutore == -99:
+		esecutore = GameState.fazione_effettiva()
 	var a := _trova(id)
-	if a.is_empty() or _ricarica[id] > 0.0:
+	if a.is_empty() or float(_ricarica.get(_chiave(id, esecutore), 0.0)) > 0.0:
+		return false
+	# si decide di giorno e si sopravvive di notte: prima le azioni giravano
+	# anche di notte e il giocatore ne faceva tre per ogni azione dell'IA
+	if GameState.fase != GameState.Fase.GIORNO:
+		return false
+	if azioni_rimaste(esecutore) <= 0:
 		return false
 	if id == "licenzia":
 		return not get_tree().get_nodes_in_group("guardia").is_empty()
@@ -45,16 +61,19 @@ func eseguibile(id: String) -> bool:
 			return false
 	return true
 
-func esegui(id: String) -> bool:
-	if not eseguibile(id):
+func esegui(id: String, esecutore := -99) -> bool:
+	if esecutore == -99:
+		esecutore = GameState.fazione_effettiva()
+	if not eseguibile(id, esecutore):
 		Audio.suona("negato", -12.0)
 		return false
 	var a := _trova(id)
-	_ricarica[id] = a["ricarica"]
+	_ricarica[_chiave(id, esecutore)] = a["ricarica"]
+	GameState.azioni_usate[esecutore] += 1
 	for campo in a.get("effetti", {}):
 		GameState.modifica(campo, a["effetti"][campo])
 	if a.has("speciale"):
-		_speciale(a["speciale"])
+		_speciale(a["speciale"], esecutore)
 	Audio.suona("azione", -10.0)
 	GameState.cambiato.emit()
 	return true
@@ -65,8 +84,9 @@ func _trova(id: String) -> Dictionary:
 			return a
 	return {}
 
-func _speciale(nome: String) -> void:
-	var mia: int = GameState.fazione_effettiva()
+## `mia` prima leggeva la fazione del GIOCATORE invece di quella di chi esegue:
+## se un'IA deposta sabotava, i punti potere finivano al giocatore.
+func _speciale(nome: String, mia: int) -> void:
 	match nome:
 		"scomunica":
 			# colpisce chi comanda davvero, non a caso
@@ -81,8 +101,11 @@ func _speciale(nome: String) -> void:
 		"coprifuoco":
 			GameState.sposta_potere(-1, 2, 6.0)
 		"ripara_tutto":
+			# non risuscita i varchi gia' caduti: risigillare una breccia deve
+			# costare il leader sul posto col tasto E
 			for b in get_tree().get_nodes_in_group("barricata"):
-				b.ripara(Balance.BARRICATA_VITA)
+				if b.in_piedi:
+					b.ripara(Balance.BARRICATA_VITA * Balance.RINFORZA_QUOTA)
 		"addestramento":
 			GameState.modifica("denaro", -GameState.costo_addestramento())
 			GameState.addestramenti += 1
