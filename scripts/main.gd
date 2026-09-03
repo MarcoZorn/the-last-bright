@@ -12,6 +12,7 @@ var _prossimo_spawn := 0.0
 var _vita_totale_barricate := 0.0
 var _luce: CanvasModulate
 var _guardie: Node2D
+var _fra_istantanee := 0.0
 
 func _ready() -> void:
 	mondo = preload("res://scripts/world.gd").new()
@@ -87,8 +88,10 @@ func _ready() -> void:
 	if Rete.in_rete:
 		print("[rete] partita avviata, sono %d, fazione %s" % [
 			multiplayer.get_unique_id(), GameState.NOMI[GameState.fazione_giocatore]])
-		await get_tree().create_timer(3.0).timeout
-		print("[rete] leader in scena: %d" % giocatori.get_child_count())
+		await get_tree().create_timer(8.0).timeout
+		print("[rete] leader %d | giorno %d | morale %.0f | denaro %.0f | fase %d" % [
+			giocatori.get_child_count(), GameState.giorno, GameState.morale,
+			GameState.denaro, GameState.fase])
 	if "--shot" in OS.get_cmdline_user_args():
 		_scatta_panoramica()
 
@@ -132,6 +135,15 @@ func _illumina(nuova: GameState.Fase) -> void:
 	create_tween().tween_property(_luce, "color", colore, 2.5)
 
 func _process(delta: float) -> void:
+	# in rete la partita gira in un posto solo: i client disegnano quello che
+	# ricevono, altrimenti tre simulazioni divergerebbero in pochi secondi
+	if not Rete.e_il_server():
+		return
+	if Rete.in_rete:
+		_fra_istantanee -= delta
+		if _fra_istantanee <= 0.0:
+			_fra_istantanee = 0.25
+			GameState.applica.rpc(GameState.istantanea())
 	if GameState.finita:
 		if Input.is_action_just_pressed("ricomincia"):
 			GameState.ripristina()

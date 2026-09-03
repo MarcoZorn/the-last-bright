@@ -167,6 +167,29 @@ func ripristina() -> void:
 	vinta = false
 	Spedizione.in_corso = 0
 
+## --- replica ---
+## Lo stato della citta' e' del server. I client non lo calcolano: lo ricevono.
+## Qui dentro passera' anche l'informazione nascosta del ribelle: il giorno che
+## servira', basta filtrare questo dizionario per destinatario invece di
+## spedirlo uguale a tutti.
+const CAMPI := ["morale", "denaro", "viveri", "sicurezza", "popolazione", "potere",
+	"deposta", "giorno", "fase", "tempo_fase", "zombie_uccisi", "livello_guardie",
+	"addestramenti", "azioni_usate", "finita", "vinta"]
+
+func istantanea() -> Dictionary:
+	var d := {}
+	for campo in CAMPI:
+		d[campo] = get(campo)
+	return d
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func applica(d: Dictionary) -> void:
+	var fase_prima := fase
+	for campo in d:
+		set(campo, d[campo])
+	if fase != fase_prima:
+		fase_cambiata.emit(fase)
+
 func _registra_tasti() -> void:
 	var movimento := {"ui_up": KEY_W, "ui_down": KEY_S, "ui_left": KEY_A, "ui_right": KEY_D}
 	for azione in movimento:
