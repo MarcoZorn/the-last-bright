@@ -19,6 +19,7 @@ var _anello := Line2D.new()
 var _livello_visto := -1
 var _sprite: Sprite2D
 var _meta_diretta := Vector2.INF
+var _fra_ronde := 0.0
 var _tempo := 0.0
 
 func _ready() -> void:
@@ -104,10 +105,11 @@ func _physics_process(delta: float) -> void:
 	Grafica.passo(_sprite, velocity, _tempo)
 
 	_cooldown -= delta
-	if _cooldown > 0.0:
-		return
 	var preda := _piu_vicino()
 	if preda == null:
+		_presidia(delta)
+		return
+	if _cooldown > 0.0:
 		return
 	_cooldown = Balance.GUARDIA_CADENZA[GameState.livello_guardie]
 	Audio.suona("sparo", -20.0)
@@ -116,6 +118,33 @@ func _physics_process(delta: float) -> void:
 	p.danno = Balance.PROIETTILE_DANNO[GameState.livello_guardie]
 	p.global_position = global_position
 	get_parent().add_child(p)
+
+## Senza questo le guardie restavano dove le avevi reclutate -- in piazza, a
+## duecento pixel dai combattimenti -- e in cinque partite simulate non hanno
+## ucciso un solo zombie. Adesso, se nessuno ha dato ordini e non c'e' nessuno a
+## tiro, vanno da sole al varco che sta cedendo.
+## ponytail: un ordine del giocatore vale finche' non e' arrivata; poi riprende
+## il presidio. Se servira' tenerle inchiodate a un posto, aggiungere un ordine
+## "resta qui" invece di complicare questa.
+func _presidia(delta: float) -> void:
+	if not _percorso.is_empty() or _meta_diretta != Vector2.INF:
+		return
+	_fra_ronde -= delta
+	if _fra_ronde > 0.0:
+		return
+	_fra_ronde = 2.0
+	var meta: Barricata = null
+	var d_min := INF
+	for b in get_tree().get_nodes_in_group("barricata"):
+		if not b.in_piedi:
+			continue
+		# un varco sotto attacco vale piu' di uno tranquillo, anche se lontano
+		var d: float = b.distanza(global_position) - (600.0 if b.sotto_attacco > 0.0 else 0.0)
+		if d < d_min:
+			d_min = d
+			meta = b
+	if meta != null and meta.distanza(global_position) > Balance.GUARDIA_RAGGIO[GameState.livello_guardie] * 0.7:
+		vai_a(meta.punto_approccio(global_position))
 
 func _piu_vicino() -> Node2D:
 	var migliore: Node2D = null
