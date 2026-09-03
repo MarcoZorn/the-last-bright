@@ -160,6 +160,8 @@ func _aggiorna_stato() -> void:
 		+ "  Zombie uccisi %5d\n" % GameState.zombie_uccisi
 		+ "  Guardie liv.  %5d\n" % GameState.livello_guardie
 		+ "  Gettito/alba  %5.0f\n" % GameState.gettito_atteso()
+		+ "  Azioni oggi    %d/%d\n" % [Azioni.istanza.azioni_rimaste(GameState.fazione_effettiva()),
+			Balance.AZIONI_PER_GIORNO]
 		+ ("  Spedizioni in corso %d\n" % Spedizione.in_corso if Spedizione.in_corso > 0 else ""))
 
 func _aggiorna_potere() -> void:
@@ -201,7 +203,11 @@ func _aggiorna_azioni() -> void:
 		var testo: Label = _barra_azioni.get_child(i).get_node("testo")
 		var quota := Azioni.istanza.quota_ricarica(a["id"])
 		var coda := ""
-		if quota > 0.0:
+		if GameState.fase != GameState.Fase.GIORNO:
+			coda = "  (solo di giorno)"
+		elif Azioni.istanza.azioni_rimaste(mia) <= 0:
+			coda = "  (azioni finite)"
+		elif quota > 0.0:
 			coda = "  %.0fs" % (quota * a["ricarica"])
 		elif a["id"] == "addestramento":
 			coda = "  %d$" % int(GameState.costo_addestramento())
