@@ -41,17 +41,26 @@ def vuoto():
 
 # --- corpo comune ----------------------------------------------------------
 
-def umano(g, pelle, veste, veste_scura, occhi=(30, 30, 40, 255)):
-    blocco(g, 6, 3, 4, 4, pelle)          # testa
-    blocco(g, 6, 6, 4, 1, pelle)          # collo/mento
-    punto(g, 6, 5, occhi)
+def schiarisci(c, q=26):
+    return tuple(min(255, v + q) if k < 3 else v for k, v in enumerate(c))
+
+def umano(g, pelle, veste, veste_scura, occhi=(38, 32, 44, 255)):
+    """Corpo comune. La luce viene dall'alto a sinistra: senza le due tonalita'
+    le figure sembravano ritagli di cartone accanto agli sprite di Kenney."""
+    pelle_chiara = schiarisci(pelle, 20)
+    blocco(g, 5, 3, 6, 4, pelle)          # testa piu' larga: ci stanno gli occhi
+    blocco(g, 5, 3, 6, 1, pelle_chiara)   # fronte in luce
+    blocco(g, 6, 7, 4, 1, pelle)          # collo
+    punto(g, 6, 5, occhi)                 # occhi staccati dal bordo, si vedono
     punto(g, 9, 5, occhi)
-    blocco(g, 5, 7, 6, 5, veste)          # busto
-    blocco(g, 5, 10, 6, 2, veste_scura)   # ombra sotto
-    blocco(g, 4, 8, 1, 3, veste)          # braccia
-    blocco(g, 11, 8, 1, 3, veste)
-    blocco(g, 6, 12, 2, 2, veste_scura)   # gambe
-    blocco(g, 8, 12, 2, 2, veste_scura)
+    punto(g, 7, 6, tuple(max(0, v - 22) if k < 3 else v for k, v in enumerate(pelle)))
+    blocco(g, 5, 8, 6, 4, veste)          # busto
+    blocco(g, 5, 8, 3, 4, schiarisci(veste))   # meta' in luce
+    blocco(g, 5, 11, 6, 1, veste_scura)   # piega bassa
+    blocco(g, 4, 8, 1, 3, veste_scura)    # braccia
+    blocco(g, 11, 8, 1, 3, veste_scura)
+    blocco(g, 5, 12, 2, 2, veste_scura)   # gambe
+    blocco(g, 9, 12, 2, 2, veste_scura)
 
 def chiesa():
     g = vuoto()
@@ -59,17 +68,17 @@ def chiesa():
     # mitra: la sagoma piu' alta e appuntita delle tre, riconoscibile da lontano
     blocco(g, 7, 0, 2, 1, (250, 214, 96, 255))
     blocco(g, 6, 1, 4, 1, (250, 214, 96, 255))
-    blocco(g, 5, 2, 6, 1, (236, 190, 70, 255))
-    blocco(g, 7, 8, 2, 3, (176, 92, 200, 255))   # stola viola
+    blocco(g, 4, 2, 8, 1, (236, 190, 70, 255))
+    blocco(g, 7, 8, 2, 4, (176, 92, 200, 255))   # stola viola
     contorno(g)
     return g
 
 def governo():
     g = vuoto()
     umano(g, (226, 186, 150, 255), (190, 60, 58, 255), (150, 42, 44, 255))
-    blocco(g, 4, 2, 8, 1, (60, 56, 70, 255))     # tuba bassa e larga
+    blocco(g, 3, 2, 10, 1, (60, 56, 70, 255))    # tuba bassa e larga
     blocco(g, 6, 0, 4, 2, (60, 56, 70, 255))
-    blocco(g, 6, 8, 4, 1, (240, 230, 210, 255))  # fascia bianca
+    blocco(g, 5, 9, 6, 1, (240, 230, 210, 255))  # fascia bianca
     contorno(g)
     return g
 
@@ -78,14 +87,14 @@ def esercito():
     umano(g, (214, 172, 138, 255), (92, 108, 140, 255), (66, 78, 108, 255))
     blocco(g, 5, 2, 6, 2, (168, 176, 190, 255))  # elmo
     blocco(g, 7, 0, 2, 2, (208, 76, 60, 255))    # cresta rossa
-    blocco(g, 5, 8, 6, 1, (168, 176, 190, 255))  # corazza
+    blocco(g, 5, 9, 6, 1, (168, 176, 190, 255))  # corazza
     contorno(g)
     return g
 
 def guardia():
     g = vuoto()
-    umano(g, (214, 172, 138, 255), (120, 130, 148, 255), (86, 94, 112, 255))
-    blocco(g, 5, 2, 6, 2, (150, 158, 172, 255))  # elmo senza cresta:
+    umano(g, (218, 178, 144, 255), (96, 138, 190, 255), (62, 96, 142, 255))
+    blocco(g, 5, 2, 6, 2, (178, 190, 206, 255))  # elmo senza cresta:
     blocco(g, 12, 4, 1, 9, (150, 110, 62, 255))  # e' truppa, non un leader
     blocco(g, 12, 2, 1, 2, (190, 196, 206, 255)) # lancia
     contorno(g)

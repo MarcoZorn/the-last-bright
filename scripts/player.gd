@@ -7,7 +7,9 @@ class_name Player
 ## 0 Chiesa, 1 Governo, 2 Esercito
 @export_enum("Chiesa", "Governo", "Esercito") var fazione: int = 0
 
-const SPRITE_FAZIONE := [Vector2i(0, 7), Vector2i(4, 8), Vector2i(0, 8)]
+## Colonne in assets/sprites.png: mitra dorata, tuba, elmo con cresta.
+## Devono dire a colpo d'occhio CHI sei, non solo che sei un personaggio.
+const SPRITE_FAZIONE := [0, 1, 2]
 const PORTATA_RIPARAZIONE := Balance.TILE * 2.5
 
 var mondo: World
@@ -23,9 +25,11 @@ var _tempo := 0.0
 func _ready() -> void:
 	add_to_group("player")
 	add_to_group("danneggiabile")
-	var c: Vector2i = SPRITE_FAZIONE[fazione]
-	$Sprite2D.region_rect = Rect2(c.x * Balance.TILE, c.y * Balance.TILE, Balance.TILE, Balance.TILE)
+	_vesti(fazione)
 	Grafica.ombra(self, 5.0)
+
+func _vesti(f: int) -> void:
+	$Sprite2D.region_rect = Rect2(SPRITE_FAZIONE[f] * Balance.TILE, 0, Balance.TILE, Balance.TILE)
 
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
@@ -62,8 +66,7 @@ func _scorciatoie() -> void:
 		if Input.is_action_just_pressed("fazione_%d" % (f + 1)):
 			GameState.fazione_giocatore = f
 			fazione = f
-			var c: Vector2i = SPRITE_FAZIONE[f]
-			$Sprite2D.region_rect = Rect2(c.x * Balance.TILE, c.y * Balance.TILE, Balance.TILE, Balance.TILE)
+			_vesti(f)
 			GameState.annuncio.emit("Ora giochi: %s" % GameState.NOMI[GameState.fazione_effettiva()], Color(0.8, 0.9, 1))
 
 ## Fendente frontale: colpisce tutto quello che hai davanti entro il raggio.

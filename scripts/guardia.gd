@@ -29,9 +29,9 @@ func _ready() -> void:
 
 	_sprite = Sprite2D.new()
 	var s := _sprite
-	s.texture = load("res://assets/kenney/tiny-dungeon/Tilemap/tilemap_packed.png")
+	s.texture = load("res://assets/sprites.png")
 	s.region_enabled = true
-	s.region_rect = Rect2(0, 128, Balance.TILE, Balance.TILE)  # cavaliere
+	s.region_rect = Rect2(3 * Balance.TILE, 0, Balance.TILE, Balance.TILE)  # elmo e lancia
 	add_child(s)
 
 	var forma := CircleShape2D.new()
@@ -76,6 +76,8 @@ func subisci(danno: float, _spinta := Vector2.ZERO) -> void:
 	_barra.aggiorna(vita / vita_max())
 	if vita <= 0.0:
 		Grafica.schizzo(get_parent(), global_position, Color(0.9, 0.3, 0.3), 9)
+		remove_from_group("guardia")
+		remove_from_group("danneggiabile")
 		queue_free()
 
 func _physics_process(delta: float) -> void:
