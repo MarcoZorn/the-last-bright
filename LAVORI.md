@@ -3,6 +3,14 @@
 Lista che guida il loop notturno. La voce piu' in alto e' la prossima da fare.
 Aggiornare a ogni ciclo: cosa e' stato fatto, cosa resta.
 
+## Regola fissa di ogni ciclo
+
+Prima di chiudere il ciclo: rigenerare la build Windows (`./gioca.sh windows`) e
+verificare che l'exe esista. Marco la vuole sempre pronta.
+
+Se a meta' notte la lista qui sotto e' esaurita: iniziare la versione **3D**
+(stessa logica, client nuovo), cercando asset 3D con licenza CC0.
+
 ## Prossimi
 
 1. **Far girare il simulatore di bilanciamento** (`./gioca.sh sim`) e tarare i numeri
