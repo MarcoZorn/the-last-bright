@@ -68,6 +68,7 @@ func _ready() -> void:
 	if "--esercito" in OS.get_cmdline_user_args():
 		GameState.fazione_giocatore = 2
 		p.fazione = 2
+		p._vesti(2)
 		for i in 4:
 			Azioni.istanza._recluta(mondo.piazza_centro() + Vector2(randf_range(-40, 40), randf_range(-40, 40)))
 	if "--shot" in OS.get_cmdline_user_args():
@@ -76,6 +77,9 @@ func _ready() -> void:
 ## Selezione e ordini alle guardie: sinistro seleziona, destro manda.
 func _unhandled_input(evento: InputEvent) -> void:
 	if not (evento is InputEventMouseButton and evento.pressed):
+		return
+	var mio: Player = get_tree().get_first_node_in_group("player")
+	if mio == null or not mio.is_multiplayer_authority():
 		return
 	var punto := get_global_mouse_position()
 	if evento.button_index == MOUSE_BUTTON_LEFT:
@@ -112,7 +116,8 @@ func _process(delta: float) -> void:
 		return
 	GameState.tempo_fase += delta
 	_aggiorna_sicurezza()
-	if get_tree().get_nodes_in_group("edificio").all(func(e): return not e.in_piedi):
+	var poli := get_tree().get_nodes_in_group("edificio")
+	if not poli.is_empty() and poli.all(func(e): return not e.in_piedi):
 		GameState.finita = true
 	if GameState.fase == GameState.Fase.GIORNO:
 		if GameState.tempo_fase >= Balance.giorno_durata(GameState.giorno):
@@ -135,11 +140,12 @@ func _inizia_notte() -> void:
 
 func _notte(delta: float) -> void:
 	_prossimo_spawn -= delta
-	if _da_spawnare > 0 and _prossimo_spawn <= 0.0 and _zombie.get_child_count() < Balance.ZOMBIE_MAX:
+	var vivi := get_tree().get_nodes_in_group("zombie").size()
+	if _da_spawnare > 0 and _prossimo_spawn <= 0.0 and vivi < Balance.ZOMBIE_MAX:
 		_prossimo_spawn = Balance.SPAWN_RITMO
 		_da_spawnare -= 1
 		_genera()
-	var ripulita: bool = _da_spawnare == 0 and _zombie.get_child_count() == 0
+	var ripulita: bool = _da_spawnare == 0 and vivi == 0
 	if ripulita:
 		GameState.cambia_fase(GameState.Fase.GIORNO)
 	elif GameState.tempo_fase > Balance.notte_durata(GameState.giorno):
@@ -148,10 +154,11 @@ func _notte(delta: float) -> void:
 ## Il sole sorge comunque. Quelli ancora in giro non sopravvivono alla luce.
 func _alba_brucia() -> void:
 	var rimasti := get_tree().get_nodes_in_group("zombie")
-	# ogni zombie ancora dentro le mura all'alba si e' preso qualcuno: senza
-	# questo, "scappa e aspetta il sole" era una strategia vincente gratuita
-	if not rimasti.is_empty():
-		GameState.perdi_abitanti(rimasti.size() * Balance.ABITANTI_PERSI_PER_ZOMBIE)
+	# solo chi e' riuscito a entrare si e' preso qualcuno. Contando anche quelli
+	# fermi sull'altra riva la citta' moriva al giorno sei in ogni simulazione.
+	var dentro := rimasti.filter(func(z): return mondo.dentro_le_mura.has_point(z.global_position))
+	if not dentro.is_empty():
+		GameState.perdi_abitanti(dentro.size() * Balance.ABITANTI_PERSI_PER_ZOMBIE)
 	for z in rimasti:
 		z.brucia()
 	_da_spawnare = 0
