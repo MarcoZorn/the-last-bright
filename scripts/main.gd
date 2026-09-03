@@ -148,6 +148,10 @@ func _notte(delta: float) -> void:
 ## Il sole sorge comunque. Quelli ancora in giro non sopravvivono alla luce.
 func _alba_brucia() -> void:
 	var rimasti := get_tree().get_nodes_in_group("zombie")
+	# ogni zombie ancora dentro le mura all'alba si e' preso qualcuno: senza
+	# questo, "scappa e aspetta il sole" era una strategia vincente gratuita
+	if not rimasti.is_empty():
+		GameState.perdi_abitanti(rimasti.size() * Balance.ABITANTI_PERSI_PER_ZOMBIE)
 	for z in rimasti:
 		z.brucia()
 	_da_spawnare = 0
