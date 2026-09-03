@@ -24,8 +24,6 @@ var _barra: BarraVita
 
 func _ready() -> void:
 	add_to_group("zombie")
-	collision_layer = 8
-	collision_mask = 1 | 4   # mura del mondo + barricate in piedi
 	_fra_ricalcoli = randf() * Balance.PATH_REFRESH  # sfasa il costo su piu' frame
 	# ogni notte quelli che arrivano sono piu' duri di quelli di ieri
 	vita_max = Balance.zombie_vita(GameState.giorno)

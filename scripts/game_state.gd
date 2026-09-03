@@ -66,7 +66,7 @@ func cambia_fase(nuova: Fase) -> void:
 ## L'alba e' il momento in cui la citta' fa i conti: incassa, mangia, e ridistribuisce
 ## il potere in base a chi ha effettivamente tenuto in piedi la baracca.
 func _alba() -> void:
-	denaro += popolazione * Balance.TASSE_PER_ABITANTE * (morale * Balance.TASSE_PESO_MORALE)
+	denaro += gettito_atteso()
 
 	var mangiato := popolazione * Balance.VIVERI_PER_ABITANTE
 	if viveri >= mangiato:

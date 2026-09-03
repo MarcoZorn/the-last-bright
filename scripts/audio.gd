@@ -35,11 +35,14 @@ const LETTORI := 14
 ## questo, cento zombie che rodono la stessa porta fanno un muro di rumore.
 const RIPETIZIONE_MINIMA := {"morso_mura": 0.12, "sparo": 0.05, "colpo": 0.04}
 
+var _tracce := {}   # nome -> [AudioStream], caricate una volta sola
 var _pool: Array[AudioStreamPlayer] = []
 var _prossimo := 0
 var _ultima_volta := {}
 
 func _ready() -> void:
+	for nome in SUONI:
+		_tracce[nome] = SUONI[nome].map(func(p): return load(p))
 	for i in LETTORI:
 		var p := AudioStreamPlayer.new()
 		p.bus = "Master"
@@ -57,7 +60,7 @@ func suona(nome: String, volume_db := -6.0) -> void:
 		_ultima_volta[nome] = ora
 	var lettore := _pool[_prossimo]
 	_prossimo = (_prossimo + 1) % LETTORI
-	lettore.stream = load(SUONI[nome].pick_random())
+	lettore.stream = _tracce[nome].pick_random()
 	lettore.volume_db = volume_db
 	lettore.pitch_scale = randf_range(0.92, 1.08)
 	lettore.play()

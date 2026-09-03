@@ -65,7 +65,6 @@ func subisci(danno: float, _spinta := Vector2.ZERO) -> void:
 func _crolla() -> void:
 	in_piedi = false
 	vita = 0.0
-	remove_from_group("danneggiabile")
 	var macerie := ColorRect.new()
 	macerie.color = Color(0.15, 0.1, 0.1, 0.6)
 	var minimo := celle[0]
