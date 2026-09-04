@@ -80,10 +80,14 @@ soli. L'assedio non e' scritto da nessuna parte: viene fuori dalla mappa.
 Dopo aver modificato la mappa:
 
 ```bash
+./gioca.sh test                                             # tutti i controlli in una volta
 python3 tools/check_map.py                                  # non hai murato un varco?
-godot --headless --script res://tools/test_assedio.gd       # l'assedio funziona ancora?
-godot --headless --script res://tools/test_potere.gd        # il golpe scatta ancora?
-godot --headless --resolution 1280x720 -- --shot --notte    # panoramica in /tmp/lastbright_shot.png
+
+godot --headless res://tools/test_assedio.tscn              # barricate: chiudono, cadono, si richiudono
+godot --headless res://tools/test_potere.tscn               # il golpe scatta ancora?
+godot --headless res://tools/test_guardia.tscn              # le difese ammazzano davvero?
+./gioca.sh sim                                              # cinque partite giocate dall'IA
+./gioca.sh foto --notte                                     # panoramica in /tmp/lastbright_shot.png
 ```
 
 ## Asset
