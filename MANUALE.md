@@ -4,6 +4,26 @@
 
 ---
 
+## Giocare in tre
+
+Dal menu:
+
+- uno preme **O** per ospitare. Gli compaiono gli indirizzi della sua macchina.
+- gli altri premono **U**, scrivono quell'indirizzo e battono invio.
+- quando siete in sala d'attesa, l'ospite preme **INVIO** e si comincia.
+
+Le fazioni si assegnano in ordine di arrivo: ospite Chiesa, secondo Governo,
+terzo Esercito. I posti vuoti li riempie il computer, quindi si puo' partire
+anche in due. Serve essere sulla stessa rete (stesso wifi): per giocare da case
+diverse serve aprire la porta **8910** sul router dell'ospite, oppure una VPN
+tipo Tailscale o Hamachi.
+
+**Chi decide cosa.** Ognuno muove il proprio leader sul suo computer. Tutto il
+resto -- risorse, potere, ondate, zombie, barricate -- lo calcola solo l'ospite,
+e gli altri lo ricevono. Non e' pignoleria: e' la premessa perche' il ribelle
+possa avere informazioni che gli altri non hanno, senza che bastino gli
+strumenti da sviluppatore per sbirciare.
+
 ## In due righe
 
 Governi una citta'-stato assediata insieme ad altre due fazioni. Di giorno

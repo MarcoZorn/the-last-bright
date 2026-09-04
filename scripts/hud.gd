@@ -100,6 +100,9 @@ func _costruisci_manuale() -> void:
   GUARDIE       Q recluta   click sx seleziona   click dx mandala li'
   FAZIONE       1-6 le tue azioni     F1/F2/F3 cambi fazione (per provare)
 
+  IN TRE
+  Dal menu: O ospita, U si unisce. I posti vuoti li riempie il computer.
+
   IL POTERE E' A SOMMA ZERO
   Chiesa, Governo ed Esercito si dividono 100 punti di legittimita'.
   All'alba chi ha prodotto risultati ne guadagna e li toglie agli altri:

@@ -58,7 +58,7 @@ combattimento, economia con viveri, potere a somma zero, golpe e ribelle,
 spedizioni fuori le mura. Le due fazioni che non giochi sono guidate da una IA
 scema (`ia_fazione.gd`) che si toglie il giorno che arriveranno tre giocatori veri.
 
-Ancora da fare: multiplayer, stealth vero per il ribelle (adesso agisce ma non si
+Ancora da fare: stealth vero per il ribelle (adesso agisce ma non si
 nasconde), sprite animati, audio.
 
 Una cosa da capire prima di toccare il codice: **gli zombie non inseguono
@@ -90,6 +90,17 @@ godot --headless --resolution 1280x720 -- --shot --notte    # panoramica in /tmp
 
 Kenney (kenney.nl), licenza CC0. Scaricati con `tools/fetch-assets.sh`.
 Sono placeholder: servono a leggere la mappa, non a essere l'aspetto finale.
+
+## Giocare in tre
+
+`O` ospita, `U` si unisce, porta 8910. Il movimento dei leader e' del client,
+tutto il resto (risorse, potere, ondate, zombie, barricate) e' del server.
+Provarlo senza cliccare:
+
+```bash
+godot -- --ospita --avvia-fra=5      # in un terminale
+godot -- --unisciti=127.0.0.1        # in un altro
+```
 
 ## Far provare il gioco a qualcuno
 
