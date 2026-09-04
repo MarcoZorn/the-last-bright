@@ -140,9 +140,10 @@ func _costruisci_manuale() -> void:
   non torna.
 
   LA NOTTE HA UNA POSTA
-  All'alba il sole brucia gli zombie rimasti, ma ognuno che e' riuscito a
-  entrare dentro le mura si e' gia' portato via un abitante. Scappare e
-  aspettare il sole non e' gratis.
+  All'alba il sole brucia gli zombie rimasti, ma ognuno ti e' costato gente:
+  due abitanti se era dentro le mura, uno se premeva da fuori. Un'ondata di
+  quaranta che non ammazzi sono quaranta persone in meno. Aspettare il sole
+  e' la trappola piu' costosa del gioco.
 
   L'ASSEDIO
   Gli zombie non ti inseguono: puntano ai tre edifici. Finche' le barricate

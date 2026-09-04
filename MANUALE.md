@@ -59,10 +59,14 @@ si spendono da un budget che si ricarica ogni alba, e di notte sono spente: la
 notte si sopravvive, non si legifera. Questo e' il vero costo del gioco --
 Predica *invece di* Processione e' una scelta, non "tutte e due".
 
-**Notte** — arrivano. La notte finisce quando li hai ripuliti tutti, oppure
-all'alba: il sole sorge comunque e brucia quelli rimasti. Ma non gratis: **ogni
-zombie ancora dentro le mura all'alba si e' portato via un abitante.** Lasciarne
-venti dentro e aspettare il sole costa venti persone.
+**Notte** — arrivano tutti insieme, presto. La notte finisce quando li hai
+ripuliti, oppure all'alba: il sole sorge comunque e brucia quelli rimasti.
+
+**Ma l'alba non e' un pulsante che azzera il tabellone.** Ogni zombie ancora
+vivo quando sorge il sole ti e' costato gente: **due abitanti** se era riuscito
+a entrare dentro le mura, **uno** se stava ancora premendo da fuori. Un'ondata
+di quaranta che non hai ammazzato sono quaranta persone in meno. Per questo le
+guardie e le mura non sono decorazione: sono l'unico modo di ridurre quel conto.
 
 **I fronti si aprono col tempo.** I primi quattro giorni arrivano solo dal ponte
 a nord: un fronte solo, impari a tenerlo. Dal **giorno 5** anche dai fianchi. Dal
@@ -159,6 +163,10 @@ Tutto si tiene.
 zombie; quattro nello stesso punto sono un muro di fuoco. Muovile insieme, e
 ricordati che l'addestramento vale piu' del numero: una guardia di livello 3
 spara il triplo di una recluta e costa un solo posto da difendere.
+
+**Aspettare il sole.** E' la trappola piu' costosa del gioco: sembra gratis e
+non lo e'. Ogni notte che finisci senza aver ammazzato nessuno paghi il prezzo
+pieno dell'ondata in abitanti.
 
 **Guardare dalla parte sbagliata.** La mappa e' piu' grande dello schermo. Le
 **frecce rosse** ai bordi ti dicono quale varco sta cedendo mentre tu sei
