@@ -4,23 +4,37 @@
 
 ---
 
+## Dove si gioca
+
+**https://aconite.dev/thelastbright/** — si apre nel browser, su computer e su
+telefono. Non c'e' niente da installare.
+
+Su telefono: il pollice sinistro fa da levetta (tocchi dove vuoi e trascini),
+i pulsanti in basso a destra sono colpire, riparare e reclutare. Le azioni della
+fazione si toccano direttamente sulla barra in basso.
+
 ## Giocare in tre
 
-Dal menu:
+**Online, da case diverse** -- e' il modo normale:
 
-- uno preme **O** per ospitare. Gli compaiono gli indirizzi della sua macchina.
-- gli altri premono **U**, scrivono quell'indirizzo e battono invio.
-- quando siete in sala d'attesa, l'ospite preme **INVIO** e si comincia.
+1. Uno inventa un codice stanza (una parola, almeno 4 caratteri) e lo scrive nel
+   campo in fondo al menu, poi preme GIOCA ONLINE.
+2. Gli altri aprono lo stesso indirizzo e scrivono **lo stesso codice**.
+3. Chi e' entrato per primo ospita: quando siete pronti preme COMINCIA.
 
-Le fazioni si assegnano in ordine di arrivo: ospite Chiesa, secondo Governo,
-terzo Esercito. I posti vuoti li riempie il computer, quindi si puo' partire
-anche in due. Serve essere sulla stessa rete (stesso wifi): per giocare da case
-diverse serve aprire la porta **8910** sul router dell'ospite, oppure una VPN
-tipo Tailscale o Hamachi.
+Niente da aprire sul router, niente indirizzi IP: basta il codice. Le fazioni si
+assegnano in ordine d'arrivo (primo Chiesa, secondo Governo, terzo Esercito) e i
+posti vuoti li riempie il computer, quindi si puo' partire anche in due.
 
-**Chi decide cosa.** Ognuno muove il proprio leader sul suo computer. Tutto il
-resto -- risorse, potere, ondate, zombie, barricate -- lo calcola solo l'ospite,
-e gli altri lo ricevono. Non e' pignoleria: e' la premessa perche' il ribelle
+**In rete locale**, dal gioco scaricato: **O** ospita, **U** si unisce con
+l'indirizzo. Latenza piu' bassa, ma serve essere sullo stesso wifi.
+
+**Chi decide cosa.** Ognuno muove il proprio leader sul suo dispositivo. Tutto
+il resto -- risorse, potere, ondate, zombie, barricate -- lo calcola solo chi
+ospita, e gli altri lo ricevono circa otto volte al secondo. Il movimento degli
+altri e' interpolato, quindi qualche decimo di ritardo si vede ma non da'
+fastidio: e' un gioco dove si decide di giorno e si regge di notte, non uno
+sparatutto. Non e' pignoleria: e' la premessa perche' il ribelle
 possa avere informazioni che gli altri non hanno, senza che bastino gli
 strumenti da sviluppatore per sbirciare.
 
