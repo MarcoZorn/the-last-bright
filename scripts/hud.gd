@@ -10,6 +10,8 @@ var _barra_azioni := HBoxContainer.new()
 var _fazione_mostrata := -99
 var _annuncio := Label.new()
 var _manuale := PanelContainer.new()
+var _finale := PanelContainer.new()
+var _finale_testo := Label.new()
 
 func _ready() -> void:
 	var telaio := Control.new()
@@ -73,6 +75,20 @@ func _ready() -> void:
 
 	_costruisci_manuale()
 	telaio.add_child(_manuale)
+
+	_finale.set_anchors_preset(Control.PRESET_CENTER)
+	_finale.position = Vector2(-250, -170)
+	_finale.visible = false
+	# il tema di serie e' semitrasparente e la mappa passava attraverso il testo
+	var fondo := StyleBoxFlat.new()
+	fondo.bg_color = Color(0.05, 0.05, 0.08, 0.96)
+	fondo.border_color = Color(0.6, 0.55, 0.4)
+	fondo.set_border_width_all(1)
+	fondo.set_content_margin_all(14)
+	_finale.add_theme_stylebox_override("panel", fondo)
+	_finale_testo.add_theme_font_size_override("font_size", 16)
+	_finale.add_child(_finale_testo)
+	telaio.add_child(_finale)
 
 	telaio.add_child(Minimappa.new())
 	telaio.add_child(Frecce.new())
@@ -146,10 +162,9 @@ func _process(_d: float) -> void:
 		_vita.size.x = 178.0 * quota
 		_vita.color = Color(1.0 - quota * 0.8, 0.2 + 0.6 * quota, 0.25)
 	if GameState.finita:
-		var esito := "HAI RETTO %d GIORNI" % Balance.GIORNI_PER_VINCERE if GameState.vinta else "LA CITTA' E' CADUTA"
-		_banner.text = "%s\n\nR per ricominciare     ESC per il menu" % esito
-		_banner.add_theme_font_size_override("font_size", 34)
-		_banner.modulate.a = 0.95
+		_banner.modulate.a = 0.0
+		_finale.visible = true
+		_finale_testo.text = _resoconto()
 	if Input.is_action_just_pressed("manuale"):
 		_manuale.visible = not _manuale.visible
 
@@ -225,6 +240,52 @@ func _aggiorna_azioni() -> void:
 			coda = "  %d$" % int(GameState.costo_addestramento())
 		testo.text = "[%d] %s%s\n%s" % [i + 1, a["nome"], coda, a["desc"]]
 		testo.modulate = Color.WHITE if Azioni.istanza.eseguibile(a["id"]) else Color(0.5, 0.5, 0.55)
+
+## A fine partita conta capire PERCHE'. Un "hai perso" secco non insegna niente
+## e non aiuta a tarare il gioco.
+func _resoconto() -> String:
+	var totale: int = GameState.zombie_uccisi + GameState.zombie_bruciati
+	var quota: float = 100.0 * GameState.zombie_uccisi / maxi(totale, 1)
+	var righe := ""
+	if GameState.vinta:
+		righe += "  LA CITTA' HA RETTO %d GIORNI  \n\n" % Balance.GIORNI_PER_VINCERE
+	else:
+		righe += "  LA CITTA' E' CADUTA - giorno %d  \n\n" % GameState.giorno
+		if GameState.popolazione == 0:
+			righe += "  Non e' rimasto nessuno da governare.\n"
+		else:
+			righe += "  I tre poli di potere sono macerie.\n"
+	righe += "\n  Abitanti rimasti      %4d di %d\n" % [GameState.popolazione, Balance.POPOLAZIONE_INIZIALE]
+	righe += "  Zombie ammazzati      %4d\n" % GameState.zombie_uccisi
+	righe += "  Bruciati dall'alba    %4d   (le difese ne hanno fermati il %.0f%%)\n" % [
+		GameState.zombie_bruciati, quota]
+	righe += "  Mura alla fine       %4.0f%%\n" % GameState.sicurezza
+	righe += "  Morale / Denaro / Viveri   %.0f / %.0f / %.0f\n" % [
+		GameState.morale, GameState.denaro, GameState.viveri]
+	righe += "\n  Potere finale\n"
+	for f in 3:
+		var nota := ""
+		if GameState.deposta == f:
+			nota = "  deposta"
+		if GameState.fazione_giocatore == f:
+			nota += "  <- tu"
+		righe += "    %-9s %5.1f%s\n" % [GameState.NOMI[f], GameState.potere[f], nota]
+	righe += "\n  %s\n" % _morale_della_storia(quota)
+	righe += "\n  R ricomincia        ESC torna al menu  \n"
+	return righe
+
+func _morale_della_storia(quota: float) -> String:
+	if GameState.viveri < 40.0:
+		return "La citta' e' morta di fame prima che di morsi: servivano spedizioni."
+	if GameState.sicurezza < 30.0:
+		return "Le mura erano finite: nessuno le ha riparate in tempo."
+	if quota < 25.0:
+		return "Quasi tutti gli zombie sono morti di sole: le difese non li fermavano."
+	if GameState.morale < 20.0:
+		return "Il popolo non credeva piu' in nessuno, e senza morale non entrano tasse."
+	if GameState.deposta >= 0:
+		return "Il potere e' cambiato di mano: la citta' ha litigato mentre la assediavano."
+	return "Nessun disastro evidente: e' andata cosi'."
 
 func _annuncia_fase(nuova: GameState.Fase) -> void:
 	_banner.text = "NOTTE %d" % GameState.giorno if nuova == GameState.Fase.NOTTE else "ALBA - GIORNO %d" % GameState.giorno

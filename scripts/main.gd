@@ -266,6 +266,15 @@ func _scatta_panoramica() -> void:
 	cam.global_position = mondo.centro(Vector2i(mondo.larghezza / 2, mondo.altezza / 2))
 	add_child(cam)
 	cam.make_current()
+	if "--fine" in OS.get_cmdline_user_args():
+		GameState.giorno = 7
+		GameState.popolazione = 0
+		GameState.viveri = 12.0
+		GameState.sicurezza = 22.0
+		GameState.zombie_uccisi = 9
+		GameState.zombie_bruciati = 84
+		GameState.deposta = 1
+		GameState.finita = true
 	if "--notte" in OS.get_cmdline_user_args():
 		GameState.giorno = 6
 		_inizia_notte()
