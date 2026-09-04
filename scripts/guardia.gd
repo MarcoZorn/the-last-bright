@@ -76,6 +76,7 @@ func subisci(danno: float, _spinta := Vector2.ZERO) -> void:
 	vita -= danno
 	_barra.aggiorna(vita / vita_max())
 	if vita <= 0.0:
+		GameState.guardie_perse += 1
 		Grafica.schizzo(get_parent(), global_position, Color(0.9, 0.3, 0.3), 9)
 		remove_from_group("guardia")
 		remove_from_group("danneggiabile")
