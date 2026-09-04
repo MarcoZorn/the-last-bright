@@ -5,8 +5,15 @@ extends Node
 ## e' tarato? Se il bot vince sempre e' troppo facile, se muore al giorno due
 ## e' troppo difficile.
 
-const PARTITE := 1
-const VELOCITA := 30.0
+const PARTITE := 3
+## Attenzione: `time_scale` da solo NON basta. Il tempo di gioco (i timer di
+## giorno e notte, che girano in _process) accelera subito, ma la fisica resta
+## limitata da `max_physics_steps_per_frame` -- default 8. Con time_scale 30 le
+## giornate volavano e le unita' si spostavano di 0.04 px per passo: nessuno
+## arrivava mai da nessuna parte, niente moriva, e ogni misura di bilanciamento
+## presa cosi' era falsa. I due valori vanno tarati insieme.
+const VELOCITA := 12.0
+const PASSI_FISICI_MAX := 64
 
 var _fatte := 0
 var _esiti: Array = []
@@ -15,6 +22,7 @@ var _inizio := 0.0
 
 func _ready() -> void:
 	Engine.time_scale = VELOCITA
+	Engine.max_physics_steps_per_frame = PASSI_FISICI_MAX
 	_nuova()
 
 func _nuova() -> void:
