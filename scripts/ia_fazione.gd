@@ -4,6 +4,8 @@ class_name IAFazione
 ## fra le azioni che puo' permettersi. Serve a rendere la partita provabile da
 ## soli -- quando arriveranno tre giocatori veri, questi nodi si tolgono.
 
+const GUARNIGIONE_MINIMA := 6
+
 var fazione: int = 0
 var _fra_mosse := 0.0
 
@@ -32,13 +34,24 @@ func _process(delta: float) -> void:
 		return
 	Azioni.istanza.esegui(_scelta(pronte)["id"], mia)
 
-## Non e' furba, ma non e' cieca: se c'e' un'emergenza evidente la guarda.
+## Non e' furba, ma non e' cieca: guarda le emergenze in ordine di gravita'.
+## L'ordine conta: prima che l'IA lo avesse, in tre partite simulate su cinque
+## non reclutava una sola guardia e la citta' si difendeva da sola con le mura.
 func _scelta(pronte: Array) -> Dictionary:
 	var urgenti: Array = []
-	if GameState.sicurezza < 60.0:
-		urgenti = pronte.filter(func(a): return a["id"] in ["rinforza", "leva", "addestramento"])
-	if urgenti.is_empty() and GameState.viveri < 80.0:
+
+	# senza una guarnigione le mura si riparano all'infinito e non serve a niente
+	if _guardie() < GUARNIGIONE_MINIMA:
+		urgenti = pronte.filter(func(a): return a["id"] == "leva")
+	if urgenti.is_empty() and GameState.viveri < 100.0:
 		urgenti = pronte.filter(func(a): return a["id"] in ["razionamento", "spedizione"])
-	if urgenti.is_empty() and GameState.morale < 30.0:
+	if urgenti.is_empty() and GameState.sicurezza < 55.0:
+		urgenti = pronte.filter(func(a): return a["id"] in ["rinforza", "leva"])
+	if urgenti.is_empty() and GameState.morale < 35.0:
 		urgenti = pronte.filter(func(a): return a["id"] in ["predica", "processione"])
+	if urgenti.is_empty() and _guardie() >= GUARNIGIONE_MINIMA and GameState.denaro > 150.0:
+		urgenti = pronte.filter(func(a): return a["id"] == "addestramento")
 	return (urgenti if not urgenti.is_empty() else pronte).pick_random()
+
+func _guardie() -> int:
+	return get_tree().get_nodes_in_group("guardia").size()
