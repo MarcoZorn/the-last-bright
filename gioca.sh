@@ -5,6 +5,7 @@
 #   ./gioca.sh sim        fa giocare l'IA e riporta il bilanciamento
 #   ./gioca.sh foto       salva una panoramica in /tmp/lastbright_shot.png
 #   ./gioca.sh windows    compila l'eseguibile per Windows
+#   ./gioca.sh linux      compila l'eseguibile per Linux
 #   ./gioca.sh web        compila per il browser e lo serve su localhost:8777
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -31,6 +32,9 @@ case "${1:-gioca}" in
       echo "export Windows FALLITO (un altro Godot ha il progetto aperto?)" >&2
       exit 1
     fi ;;
+  linux)
+    godot --headless --export-release "Linux" 2>&1 | grep -E "^ERROR|Failed" && { echo "export Linux FALLITO" >&2; exit 1; }
+    ls -lh build/linux/TheLastBright.x86_64 ;;
   web)
     godot --headless --export-release "Web" 2>&1 | grep -iE "^ERROR|Failed" && { echo "export Web FALLITO" >&2; exit 1; }
     echo "apri http://localhost:8777"
