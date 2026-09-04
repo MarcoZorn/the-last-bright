@@ -227,17 +227,20 @@ func _notte(delta: float) -> void:
 ## Il sole sorge comunque. Quelli ancora in giro non sopravvivono alla luce.
 func _alba_brucia() -> void:
 	var rimasti := get_tree().get_nodes_in_group("zombie")
-	# solo chi e' riuscito a entrare si e' preso qualcuno. Contando anche quelli
-	# fermi sull'altra riva la citta' moriva al giorno sei in ogni simulazione.
+	# L'alba non e' un pulsante che azzera il tabellone: l'ondata che non hai
+	# ammazzato ti e' costata gente. Chi era entrato costa il doppio di chi
+	# stava ancora premendo da fuori.
 	var dentro := rimasti.filter(func(z): return mondo.dentro_le_mura.has_point(z.global_position))
-	if not dentro.is_empty():
-		GameState.perdi_abitanti(dentro.size() * Balance.ABITANTI_PERSI_PER_ZOMBIE)
+	var persi: int = dentro.size() * Balance.ABITANTI_PERSI_DENTRO \
+		+ (rimasti.size() - dentro.size()) * Balance.ABITANTI_PERSI_FUORI
+	if persi > 0:
+		GameState.perdi_abitanti(persi)
 	GameState.zombie_bruciati += rimasti.size()
 	for z in rimasti:
 		z.brucia()
 	_da_spawnare = 0
 	if not rimasti.is_empty():
-		GameState.annuncio.emit("L'alba ne brucia %d" % rimasti.size(), Color(1, 0.85, 0.4))
+		GameState.annuncio.emit("L'alba ne brucia %d, ma sono costati %d abitanti" % [rimasti.size(), persi], Color(1, 0.6, 0.35))
 	GameState.cambia_fase(GameState.Fase.GIORNO)
 
 func _genera() -> void:

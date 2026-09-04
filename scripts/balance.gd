@@ -21,15 +21,15 @@ const GIORNO_CRESCITA := 3.0       # secondi in piu' per ogni giorno passato
 const GIORNO_MAX := 45.0
 ## L'alba arriva comunque: senza, bastava uno zombie incastrato per bloccare
 ## la partita in eterno.
-const NOTTE_BASE := 75.0
-const NOTTE_CRESCITA := 6.0
-const NOTTE_MAX := 120.0
+const NOTTE_BASE := 95.0
+const NOTTE_CRESCITA := 8.0
+const NOTTE_MAX := 170.0
 const GIORNI_PER_VINCERE := 10
 
 # --- ondate ---
 const ONDATA_BASE := 5
 const ONDATA_CRESCITA := 4
-const SPAWN_RITMO := 0.8
+const SPAWN_RITMO := 0.35
 const ZOMBIE_MAX := 150
 
 ## Quanto vicino devi essere per accorgerti del ribelle di notte. Oltre questa
@@ -97,7 +97,8 @@ const FAME_MORALE := 12.0           # morale perso quando i viveri finiscono
 const FAME_ABITANTI := 6
 const MORALE_PER_ABITANTE_PERSO := 0.8
 const MORALE_RECUPERO_GIORNO := 3.0
-const ABITANTI_PERSI_PER_ZOMBIE := 1   # per ogni zombie ancora DENTRO le mura all'alba
+const ABITANTI_PERSI_DENTRO := 2    # per ogni zombie che all'alba e' dentro le mura
+const ABITANTI_PERSI_FUORI := 1    # e per ognuno che sta ancora premendo da fuori
 
 # --- potere e legittimita': la somma dei tre fa sempre 100, quindi guadagnare
 #     potere significa per forza toglierlo a qualcun altro ---
