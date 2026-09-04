@@ -102,6 +102,7 @@ func _costruisci_manuale() -> void:
 
   IN TRE
   Dal menu: O ospita, U si unisce. I posti vuoti li riempie il computer.
+  Se ti depongono, di notte gli altri non vedono piu' dove sei.
 
   IL POTERE E' A SOMMA ZERO
   Chiesa, Governo ed Esercito si dividono 100 punti di legittimita'.

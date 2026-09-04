@@ -131,9 +131,14 @@ soldi che non sono suoi: ogni reclutamento e' una trattativa col Governo.
 
 | azione | effetto |
 |---|---|
-| Sabotaggio | dimezza una barricata a caso: l'Esercito ci fa brutta figura |
+| Sabotaggio | dimezza una barricata a caso, **senza annuncio**: gli altri vedono un muro cedere, non un colpevole |
 | Diffondi voci | -10 morale, rubi 6 punti di potere alla Chiesa |
 | Furto | -40$ al Governo, +5 punti di potere a te |
+
+**E di notte sparisci.** Finche' sei ribelle, dal tramonto all'alba gli altri
+giocatori non vedono dove sei: il server non manda proprio la tua posizione ai
+loro computer, a meno che uno non ti arrivi a pochi passi. Non e' un'icona
+nascosta che si puo' sbirciare -- e' informazione che i loro client non hanno.
 
 **Spedizione** ce l'hanno tutti: mandi qualcuno oltre le mura, torna dopo 22
 secondi con 30$ e 70 viveri. Il **28% delle volte non torna**, e il morale scende.
