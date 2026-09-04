@@ -10,35 +10,40 @@ l'exe esista. Marco la vuole sempre pronta. Commit piccoli, push su origin main.
 Se la lista qui sotto si esaurisce: iniziare la versione **3D** (stessa logica di
 gioco, client nuovo), cercando asset 3D con licenza CC0.
 
-## RIPARTIRE DA QUI
+## Il simulatore mentiva (risolto)
 
-Il difetto delle guardie **non e' ancora risolto**, ma ora si sa esattamente
-dov'e'. Ultima misura, con `godot --headless --audio-driver Dummy res://tools/sim.tscn -- --diag`:
+La caccia al difetto delle guardie e' finita in un posto inaspettato: **non era
+un bug del gioco, era il simulatore.**
 
-```
-[diag mov] pos=(344.0, 552.0) passo=(360.0, 536.0) vel=(48.1, -48.1) passi=19
-[diag mov] pos=(344.0, 552.0) passo=(360.0, 536.0) vel=(48.1, -48.1) passi=19
-...identico per tutta la partita...
-```
+`tools/sim.gd` usava `Engine.time_scale = 30` per giocare partite intere in
+fretta. Ma `time_scale` accelera subito il tempo di gioco -- i timer di giorno e
+notte girano in `_process` -- mentre la fisica resta limitata da
+`Engine.max_physics_steps_per_frame`, che di default vale 8. Risultato: le
+giornate volavano e le unita' si spostavano di **0.04 pixel per passo fisico**.
+Nessuno arrivava mai da nessuna parte, niente moriva, e l'alba bruciava tutto.
 
-Il percorso A* e' valido (19 passi verso il varco), la velocita' e' impostata
-correttamente, `move_and_slide()` viene chiamato -- e **la posizione non cambia
-mai di un pixel**. La guardia e' bloccata da qualcosa. Da qui, in ordine:
+Ogni misura di bilanciamento presa cosi' era falsa, e ci ho tarato sopra per
+mezza notte. Il sintomo che ha aperto la strada e' stato stampare posizione e
+velocita' insieme: velocita' 68, posizione ferma, zero collisioni. Una cosa che
+non puo' succedere -- a meno che il delta non sia minuscolo.
 
-1. `Guardia` e' un `CharacterBody2D` costruito da `scenes/guardia.tscn`, dove la
-   `CollisionShape2D` viene aggiunta **da codice** in `_ready` (a differenza di
-   giocatore e zombie, che ce l'hanno nella scena e si muovono benissimo).
-   Sospetto principale: la forma non e' registrata come si deve, oppure
-   `motion_mode` di default (GROUNDED) si comporta male in una vista dall'alto.
-   Provare `motion_mode = MOTION_MODE_FLOATING` e/o spostare la forma dentro la
-   scena.
-2. Verificare con `get_slide_collision_count()` chi la sta bloccando.
-3. Solo dopo, rifare la taratura: finche' le guardie non si muovono, ogni numero
-   misurato sulla difficolta' e' senza senso.
+Con `max_physics_steps_per_frame = 64` e `time_scale = 12` i numeri sono
+cambiati di colpo: da 0% a **60% di zombie ammazzati dalle difese**, e le
+guardie ora muoiono in combattimento (3-4 a partita).
 
-Strumenti gia' pronti: `Guardia.avvicinamento_minimo` (distanza minima mai
-raggiunta fra una guardia e uno zombie -- era 150px, il raggio e' 58) e il flag
-`--diag` che a ogni alba stampa le celle di guardie e zombie.
+**Regola:** se si tocca `VELOCITA` in `tools/sim.gd`, va ritarato anche
+`PASSI_FISICI_MAX`. I due valori vanno insieme, sempre.
+
+## Stato del bilanciamento
+
+Ultima misura (bot che gioca a caso, tre partite):
+giorno medio **6.3** su 10 da vincere, **60%** di zombie ammazzati, 3-4 guardie
+perse a partita. E' un pavimento sensato: chi gioca a caso muore verso meta',
+chi gioca bene dovrebbe farcela. **Serve un playtest umano** per andare oltre --
+tarare ancora a tavolino sarebbe di nuovo indovinare.
+
+Nota: il morale finisce a 0 in tutte le partite e il golpe non scatta piu'
+(le partite finiscono troppo presto). Da riguardare dopo il playtest.
 
 ## Prossimi
 
