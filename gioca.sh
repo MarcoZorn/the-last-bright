@@ -23,10 +23,16 @@ case "${1:-gioca}" in
   sim)     godot --headless --audio-driver Dummy res://tools/sim.tscn 2>&1 | grep -vE "^\s*$" ;;
   foto)    "${FOTO[@]}" -- --shot "${@:2}" >/dev/null 2>&1; echo "/tmp/lastbright_shot.png" ;;
   windows)
-    godot --headless --export-release "Windows Desktop" >/dev/null 2>&1
-    ls -lh build/windows/TheLastBright.exe ;;
+    # niente >/dev/null: un export fallito passava inosservato e restava in giro
+    # l'eseguibile vecchio. Succede se un altro Godot ha il progetto aperto.
+    if ! godot --headless --export-release "Windows Desktop" 2>&1 | grep -qiE "^ERROR|Failed"; then
+      ls -lh build/windows/TheLastBright.exe
+    else
+      echo "export Windows FALLITO (un altro Godot ha il progetto aperto?)" >&2
+      exit 1
+    fi ;;
   web)
-    godot --headless --export-release "Web" >/dev/null 2>&1
+    godot --headless --export-release "Web" 2>&1 | grep -iE "^ERROR|Failed" && { echo "export Web FALLITO" >&2; exit 1; }
     echo "apri http://localhost:8777"
     (cd build/web && python3 -m http.server 8777) ;;
   *) sed -n '2,9p' "$0"; exit 1 ;;
