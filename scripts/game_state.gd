@@ -29,6 +29,7 @@ var fase: Fase = Fase.GIORNO
 var giorno: int = 1
 var tempo_fase: float = 0.0
 var zombie_uccisi: int = 0
+var zombie_bruciati: int = 0   # morti all'alba invece che ammazzati: dice se le difese servono
 var finita := false
 var vinta := false
 
@@ -163,6 +164,7 @@ func ripristina() -> void:
 	giorno = 1
 	tempo_fase = 0.0
 	zombie_uccisi = 0
+	zombie_bruciati = 0
 	finita = false
 	vinta = false
 	Spedizione.in_corso = 0
@@ -173,7 +175,7 @@ func ripristina() -> void:
 ## servira', basta filtrare questo dizionario per destinatario invece di
 ## spedirlo uguale a tutti.
 const CAMPI := ["morale", "denaro", "viveri", "sicurezza", "popolazione", "potere",
-	"deposta", "giorno", "fase", "tempo_fase", "zombie_uccisi", "livello_guardie",
+	"deposta", "giorno", "fase", "tempo_fase", "zombie_uccisi", "zombie_bruciati", "livello_guardie",
 	"addestramenti", "azioni_usate", "finita", "vinta"]
 
 func istantanea() -> Dictionary:

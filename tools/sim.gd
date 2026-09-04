@@ -36,13 +36,13 @@ func _process(_delta: float) -> void:
 	_esiti.append({
 		"giorno": GameState.giorno, "vinta": GameState.vinta, "causa": causa,
 		"morale": GameState.morale, "denaro": GameState.denaro, "viveri": GameState.viveri,
-		"uccisi": GameState.zombie_uccisi, "deposta": GameState.deposta,
+		"uccisi": GameState.zombie_uccisi, "bruciati": GameState.zombie_bruciati, "deposta": GameState.deposta,
 		"guardie": guardie, "mura": GameState.sicurezza, "varchi_caduti": varchi_caduti,
 		"popolazione": GameState.popolazione,
 	})
 	# le colonne che contano per capire PERCHE' e' finita cosi'
-	print("  partita %d | giorno %2d | %-20s | pop %3d | uccisi %3d | guardie %d | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
-		_esiti.size(), GameState.giorno, causa, GameState.popolazione, GameState.zombie_uccisi,
+	print("  partita %d | giorno %2d | %-20s | pop %3d | uccisi %3d | bruciati %3d | guardie %d | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
+		_esiti.size(), GameState.giorno, causa, GameState.popolazione, GameState.zombie_uccisi, GameState.zombie_bruciati,
 		guardie, GameState.sicurezza, varchi_caduti, GameState.morale, GameState.denaro, GameState.viveri])
 	_partita.queue_free()
 	_partita = null
@@ -66,11 +66,15 @@ func _riassunto() -> void:
 	print("  giorno medio  %.1f (si vince a %d)" % [giorni / _esiti.size(), Balance.GIORNI_PER_VINCERE])
 	print("  con un golpe  %d / %d" % [golpe, _esiti.size()])
 	var uccisi := 0
+	var bruciati := 0
 	var guardie := 0
 	for e in _esiti:
 		uccisi += e["uccisi"]
+		bruciati += e["bruciati"]
 		guardie += e["guardie"]
-	print("  zombie uccisi %.1f a partita   guardie vive a fine partita %.1f" % [
-		float(uccisi) / _esiti.size(), float(guardie) / _esiti.size()])
+	var totale: float = maxf(uccisi + bruciati, 1)
+	print("  per partita: %.1f uccisi, %.1f bruciati dall'alba (%.0f%% ammazzati)" % [
+		float(uccisi) / _esiti.size(), float(bruciati) / _esiti.size(), 100.0 * uccisi / totale])
+	print("  guardie vive a fine partita %.1f" % (float(guardie) / _esiti.size()))
 	print("\n  Lettura: l'IA gioca a caso, quindi e' il pavimento del gioco.")
 	print("  Se vince quasi sempre, per un umano e' banale.")
