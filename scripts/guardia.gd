@@ -82,6 +82,9 @@ func subisci(danno: float, _spinta := Vector2.ZERO) -> void:
 		queue_free()
 
 func _physics_process(delta: float) -> void:
+	if not Rete.e_il_server():
+		set_physics_process(false)
+		return
 	# un addestramento nuovo rimette in sesto anche chi e' gia' in servizio
 	if _livello_visto != GameState.livello_guardie:
 		_livello_visto = GameState.livello_guardie
@@ -133,20 +136,41 @@ func _presidia(delta: float) -> void:
 	if _fra_ronde > 0.0:
 		return
 	_fra_ronde = 2.0
+
+	# 1. chi e' gia' dentro viene prima di tutto. Prima le guardie difendevano
+	#    i varchi ancora in piedi e ignoravano il buco da cui passavano davvero.
+	var intruso := _intruso_piu_vicino()
+	if intruso != null:
+		vai_a(intruso.global_position)
+		return
+
+	# 2. altrimenti il varco che sta cedendo, o il piu' vicino ancora in piedi
 	var meta: Barricata = null
 	var d_min := INF
 	for b in get_tree().get_nodes_in_group("barricata"):
 		if not b.in_piedi:
 			continue
-		# un varco sotto attacco vale piu' di uno tranquillo, anche se lontano
 		var d: float = b.distanza(global_position) - (600.0 if b.sotto_attacco > 0.0 else 0.0)
 		if d < d_min:
 			d_min = d
 			meta = b
-	# addosso al muro, non "a portata": lo zombie morde dall'altro lato a 22px,
-	# fermarsi a 41 metteva la guardia a 63px dal bersaglio, appena fuori tiro
+	# addosso al muro, non "a portata": lo zombie morde dall'altro lato a 22px
 	if meta != null and meta.distanza(global_position) > Balance.TILE * 1.2:
 		vai_a(meta.punto_approccio(global_position))
+
+func _intruso_piu_vicino() -> Node2D:
+	if mondo == null:
+		return null
+	var migliore: Node2D = null
+	var d_min := INF
+	for z in get_tree().get_nodes_in_group("zombie"):
+		if not mondo.dentro_le_mura.has_point(z.global_position):
+			continue
+		var d: float = global_position.distance_to(z.global_position)
+		if d < d_min:
+			d_min = d
+			migliore = z
+	return migliore
 
 func _piu_vicino() -> Node2D:
 	var migliore: Node2D = null
