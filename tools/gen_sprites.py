@@ -44,7 +44,7 @@ def vuoto():
 def schiarisci(c, q=26):
     return tuple(min(255, v + q) if k < 3 else v for k, v in enumerate(c))
 
-def umano(g, pelle, veste, veste_scura, occhi=(38, 32, 44, 255)):
+def umano(g, pelle, veste, veste_scura, occhi=(38, 32, 44, 255), passo=0):
     """Corpo comune. La luce viene dall'alto a sinistra: senza le due tonalita'
     le figure sembravano ritagli di cartone accanto agli sprite di Kenney."""
     pelle_chiara = schiarisci(pelle, 20)
@@ -59,12 +59,19 @@ def umano(g, pelle, veste, veste_scura, occhi=(38, 32, 44, 255)):
     blocco(g, 5, 11, 6, 1, veste_scura)   # piega bassa
     blocco(g, 4, 8, 1, 3, veste_scura)    # braccia
     blocco(g, 11, 8, 1, 3, veste_scura)
-    blocco(g, 5, 12, 2, 2, veste_scura)   # gambe
-    blocco(g, 9, 12, 2, 2, veste_scura)
+    # due fotogrammi: nel secondo le gambe si scambiano di un pixel. A questa
+    # scala basta quello per leggere una camminata invece di uno scivolamento.
+    if passo == 0:
+        blocco(g, 5, 12, 2, 2, veste_scura)
+        blocco(g, 9, 12, 2, 2, veste_scura)
+    else:
+        blocco(g, 5, 12, 2, 1, veste_scura)
+        blocco(g, 6, 12, 2, 2, veste_scura)
+        blocco(g, 9, 13, 2, 1, veste_scura)
 
-def chiesa():
+def chiesa(passo=0):
     g = vuoto()
-    umano(g, (232, 196, 160, 255), (238, 234, 224, 255), (198, 190, 182, 255))
+    umano(g, (232, 196, 160, 255), (238, 234, 224, 255), (198, 190, 182, 255), passo=passo)
     # mitra: la sagoma piu' alta e appuntita delle tre, riconoscibile da lontano
     blocco(g, 7, 0, 2, 1, (250, 214, 96, 255))
     blocco(g, 6, 1, 4, 1, (250, 214, 96, 255))
@@ -73,34 +80,34 @@ def chiesa():
     contorno(g)
     return g
 
-def governo():
+def governo(passo=0):
     g = vuoto()
-    umano(g, (226, 186, 150, 255), (190, 60, 58, 255), (150, 42, 44, 255))
+    umano(g, (226, 186, 150, 255), (190, 60, 58, 255), (150, 42, 44, 255), passo=passo)
     blocco(g, 3, 2, 10, 1, (60, 56, 70, 255))    # tuba bassa e larga
     blocco(g, 6, 0, 4, 2, (60, 56, 70, 255))
     blocco(g, 5, 9, 6, 1, (240, 230, 210, 255))  # fascia bianca
     contorno(g)
     return g
 
-def esercito():
+def esercito(passo=0):
     g = vuoto()
-    umano(g, (214, 172, 138, 255), (92, 108, 140, 255), (66, 78, 108, 255))
+    umano(g, (214, 172, 138, 255), (92, 108, 140, 255), (66, 78, 108, 255), passo=passo)
     blocco(g, 5, 2, 6, 2, (168, 176, 190, 255))  # elmo
     blocco(g, 7, 0, 2, 2, (208, 76, 60, 255))    # cresta rossa
     blocco(g, 5, 9, 6, 1, (168, 176, 190, 255))  # corazza
     contorno(g)
     return g
 
-def guardia():
+def guardia(passo=0):
     g = vuoto()
-    umano(g, (218, 178, 144, 255), (96, 138, 190, 255), (62, 96, 142, 255))
+    umano(g, (218, 178, 144, 255), (96, 138, 190, 255), (62, 96, 142, 255), passo=passo)
     blocco(g, 5, 2, 6, 2, (178, 190, 206, 255))  # elmo senza cresta:
     blocco(g, 12, 4, 1, 9, (150, 110, 62, 255))  # e' truppa, non un leader
     blocco(g, 12, 2, 1, 2, (190, 196, 206, 255)) # lancia
     contorno(g)
     return g
 
-def zombie(variante=0):
+def zombie(variante=0, passo=0):
     """Ingobbito e asimmetrico: si distingue dagli umani anche in mezzo alla
     mischia, senza doverlo colorare di fluorescente."""
     g = vuoto()
@@ -115,17 +122,30 @@ def zombie(variante=0):
     blocco(g, 5, 10, 6, 1, stracci)
     blocco(g, 10, 7, 2, 2, carne)                # un braccio proteso in avanti
     blocco(g, 4, 9, 1, 2, carne_scura)           # l'altro penzoloni
-    blocco(g, 5, 12, 2, 2, carne_scura)
-    blocco(g, 8, 12, 2, 2, stracci)
+    if passo == 0:
+        blocco(g, 5, 12, 2, 2, carne_scura)
+        blocco(g, 8, 12, 2, 2, stracci)
+    else:
+        blocco(g, 5, 12, 2, 1, carne_scura)
+        blocco(g, 6, 12, 2, 2, carne_scura)
+        blocco(g, 8, 13, 2, 1, stracci)
     contorno(g)
     return g
 
-FIGURE = [chiesa(), governo(), esercito(), guardia(), zombie(0), zombie(1), zombie(2)]
+# una colonna per personaggio, una riga per fotogramma
+COLONNE = [chiesa, governo, esercito, guardia,
+           lambda passo=0: zombie(0, passo),
+           lambda passo=0: zombie(1, passo),
+           lambda passo=0: zombie(2, passo)]
+FOTOGRAMMI = 2
 
-foglio = Image.new("RGBA", (T * len(FIGURE), T), VUOTO)
-for n, g in enumerate(FIGURE):
-    for y in range(T):
-        for x in range(T):
-            foglio.putpixel((n * T + x, y), g[y][x])
+foglio = Image.new("RGBA", (T * len(COLONNE), T * FOTOGRAMMI), VUOTO)
+for n, disegna in enumerate(COLONNE):
+    for f in range(FOTOGRAMMI):
+        g = disegna(f)
+        for y in range(T):
+            for x in range(T):
+                foglio.putpixel((n * T + x, f * T + y), g[y][x])
 foglio.save("assets/sprites.png")
-print("assets/sprites.png  %d figure: chiesa governo esercito guardia zombie x3" % len(FIGURE))
+print("assets/sprites.png  %d personaggi x %d fotogrammi: chiesa governo esercito guardia zombie x3"
+      % (len(COLONNE), FOTOGRAMMI))

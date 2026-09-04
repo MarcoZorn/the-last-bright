@@ -14,12 +14,16 @@ static func ombra(genitore: Node2D, raggio := 5.0) -> void:
 	p.z_index = -1
 	genitore.add_child(p)
 
-## Ondeggio del passo + specchiatura secondo la direzione.
+## Camminata: due fotogrammi che si alternano, piu' l'ondeggio e la specchiatura.
+## Il foglio ha una colonna per personaggio e una riga per fotogramma, quindi
+## basta spostare la finestra della regione in verticale.
 static func passo(sprite: Sprite2D, velocita: Vector2, tempo: float) -> void:
 	if velocita.length() < 1.0:
 		sprite.position.y = 0.0
+		sprite.region_rect.position.y = 0.0
 		return
 	sprite.position.y = -absf(sin(tempo * 11.0)) * 1.8
+	sprite.region_rect.position.y = Balance.TILE if fmod(tempo * 7.0, 2.0) >= 1.0 else 0.0
 	if absf(velocita.x) > 1.0:
 		sprite.flip_h = velocita.x < 0.0
 
