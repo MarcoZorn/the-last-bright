@@ -19,6 +19,7 @@ func _ready() -> void:
 	add_child(mondo)
 
 	var barricate := Node2D.new()
+	barricate.name = "Barricate"
 	add_child(barricate)
 	for gruppo in mondo.varchi:
 		var b := Barricata.new()
@@ -28,6 +29,7 @@ func _ready() -> void:
 	_vita_totale_barricate = mondo.varchi.size() * Balance.BARRICATA_VITA
 
 	var quartieri := Node2D.new()
+	quartieri.name = "Quartieri"
 	add_child(quartieri)
 	for tipo in mondo.edifici:
 		for gruppo in mondo._raggruppa(mondo.edifici[tipo]):
@@ -38,8 +40,10 @@ func _ready() -> void:
 			quartieri.add_child(e)
 
 	_zombie = Node2D.new()
+	_zombie.name = "Zombie"
 	add_child(_zombie)
 	_guardie = Node2D.new()
+	_guardie.name = "Guardie"
 	add_child(_guardie)
 	var guardie := _guardie
 
@@ -57,12 +61,13 @@ func _ready() -> void:
 	var giocatori := Node2D.new()
 	giocatori.name = "Giocatori"
 	add_child(giocatori)
-	var generatore := MultiplayerSpawner.new()
-	generatore.add_spawnable_scene("res://scenes/player.tscn")
-	add_child(generatore)
-	# spawn_path va calcolato DOPO l'ingresso nell'albero, altrimenti i due nodi
-	# non hanno ancora un antenato comune
-	generatore.spawn_path = generatore.get_path_to(giocatori)
+	# un generatore copre un contenitore solo, quindi ce ne vuole uno per tipo
+	# ponytail: un sincronizzatore per zombie regge una LAN a tre. Se con
+	# centocinquanta zombie la rete singhiozza, passare a un unico pacchetto di
+	# posizioni spedito dal server a 12Hz.
+	_genera_per(giocatori, "res://scenes/player.tscn")
+	_genera_per(_zombie, "res://scenes/zombie.tscn")
+	_genera_per(_guardie, "res://scenes/guardia.tscn")
 
 	if not Rete.in_rete:
 		_crea_leader(giocatori, 1, GameState.fazione_giocatore)
@@ -94,6 +99,14 @@ func _ready() -> void:
 			GameState.denaro, GameState.fase])
 	if "--shot" in OS.get_cmdline_user_args():
 		_scatta_panoramica()
+
+## spawn_path va calcolato DOPO l'ingresso nell'albero: prima i due nodi non
+## hanno ancora un antenato comune e Godot non sa risolvere il percorso.
+func _genera_per(contenitore: Node2D, scena: String) -> void:
+	var g := MultiplayerSpawner.new()
+	g.add_spawnable_scene(scena)
+	add_child(g)
+	g.spawn_path = g.get_path_to(contenitore)
 
 func _crea_leader(dove: Node2D, peer: int, fazione: int) -> void:
 	var p: Player = PLAYER.instantiate()
@@ -221,7 +234,7 @@ func _genera() -> void:
 	if not poli.is_empty():
 		z.edificio_bersaglio = poli.pick_random()
 	z.global_position = mondo.centro(cella) + Vector2(randf_range(-16, 16), randf_range(-12, 12))
-	_zombie.add_child(z)
+	_zombie.add_child(z, true)   # nome leggibile: i nomi riservati non si replicano
 
 ## Debug: `godot -- --shot` salva una panoramica della mappa e esce.
 func _scatta_panoramica() -> void:
