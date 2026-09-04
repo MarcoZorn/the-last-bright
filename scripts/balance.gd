@@ -95,8 +95,11 @@ const TASSE_PESO_MORALE := 0.01
 const VIVERI_PER_ABITANTE := 0.55   # quanto mangia la citta' ogni giorno
 const FAME_MORALE := 12.0           # morale perso quando i viveri finiscono
 const FAME_ABITANTI := 6
-const MORALE_PER_ABITANTE_PERSO := 0.8
-const MORALE_RECUPERO_GIORNO := 3.0
+## Era 0.8, cioe' -26 morale in una notte storta da 33 vittime: il morale non
+## poteva che azzerarsi, e con lui il gettito (che ne dipende) e la Chiesa (il
+## cui potere ne dipende). Una spirale senza uscita, non una difficolta'.
+const MORALE_PER_ABITANTE_PERSO := 0.2
+const MORALE_RECUPERO_GIORNO := 4.0
 const ABITANTI_PERSI_DENTRO := 2    # per ogni zombie che all'alba e' dentro le mura
 const ABITANTI_PERSI_FUORI := 1    # e per ognuno che sta ancora premendo da fuori
 
