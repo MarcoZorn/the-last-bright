@@ -19,6 +19,7 @@ var _anello := Line2D.new()
 var _livello_visto := -1
 var _sprite: Sprite2D
 var _meta_diretta := Vector2.INF
+var _meta_scade := 0.0
 var _fra_ronde := 0.0
 var _tempo := 0.0
 
@@ -71,6 +72,11 @@ func vai_a(punto: Vector2) -> void:
 		return
 	_percorso = mondo.percorso(global_position, punto)
 	_meta_diretta = punto if _percorso.is_empty() else Vector2.INF
+	# La rotta in linea retta serve per uscire dai cancelli, che A* considera
+	# chiusi. Ma se il bersaglio e' irraggiungibile -- uno zombie dall'altro lato
+	# del muro -- la guardia ci si incastrava contro e non riconsiderava mai
+	# piu': in una partita intera sparava dodici colpi in tutto.
+	_meta_scade = 6.0
 
 func subisci(danno: float, _spinta := Vector2.ZERO) -> void:
 	vita -= danno
@@ -107,7 +113,8 @@ func _physics_process(delta: float) -> void:
 			_percorso.remove_at(0)
 	elif _meta_diretta != Vector2.INF:
 		velocity = global_position.direction_to(_meta_diretta) * Balance.GUARDIA_VELOCITA
-		if global_position.distance_to(_meta_diretta) < 6.0:
+		_meta_scade -= delta
+		if global_position.distance_to(_meta_diretta) < 6.0 or _meta_scade <= 0.0:
 			_meta_diretta = Vector2.INF
 	else:
 		velocity = Vector2.ZERO
@@ -149,7 +156,7 @@ func _presidia(delta: float) -> void:
 	# 1. chi e' gia' dentro viene prima di tutto. Prima le guardie difendevano
 	#    i varchi ancora in piedi e ignoravano il buco da cui passavano davvero.
 	var intruso := _intruso_piu_vicino()
-	if intruso != null:
+	if intruso != null and not mondo.percorso(global_position, intruso.global_position).is_empty():
 		vai_a(intruso.global_position)
 		return
 
