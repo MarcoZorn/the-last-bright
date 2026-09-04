@@ -69,7 +69,10 @@ func eseguibile(id: String, esecutore := -99) -> bool:
 func esegui(id: String, esecutore := -99) -> bool:
 	if esecutore == -99:
 		esecutore = GameState.fazione_effettiva()
-	# un client non applica niente da solo: chiede, e il server decide
+	# un client non applica niente da solo: chiede, e chi ospita decide
+	if Rete.online() and not Rete.e_il_server():
+		Relay.azioni_da_spedire.append(id)
+		return true
 	if Rete.in_rete and not multiplayer.is_server():
 		_chiedi.rpc_id(1, id, esecutore)
 		return true

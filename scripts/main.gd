@@ -13,6 +13,7 @@ var _vita_totale_barricate := 0.0
 var _luce: CanvasModulate
 var _guardie: Node2D
 var _fra_istantanee := 0.0
+var _fantasmi: Fantasmi
 
 func _ready() -> void:
 	mondo = preload("res://scripts/world.gd").new()
@@ -69,7 +70,15 @@ func _ready() -> void:
 	_genera_per(_zombie, "res://scenes/zombie.tscn")
 	_genera_per(_guardie, "res://scenes/guardia.tscn")
 
-	if not Rete.in_rete:
+	if Rete.online():
+		# online i nodi non li replica Godot: li creiamo uguali su tutti,
+		# uno per fazione presente nella stanza
+		var viste := {}
+		for id in Relay.fazioni:
+			viste[Relay.fazioni[id]] = true
+		for f in viste:
+			_crea_leader(giocatori, 1, int(f), int(f) == Relay.mia_fazione)
+	elif not Rete.in_rete:
 		_crea_leader(giocatori, 1, GameState.fazione_giocatore)
 	elif multiplayer.is_server():
 		for id in Rete.fazioni:
@@ -80,7 +89,11 @@ func _ready() -> void:
 	add_child(_luce)
 	GameState.fase_cambiata.connect(_illumina)
 
+	_fantasmi = Fantasmi.new()
+	add_child(_fantasmi)
+
 	add_child(preload("res://scripts/hud.gd").new())
+	add_child(preload("res://scripts/tocco.gd").new())
 
 	if "--esercito" in OS.get_cmdline_user_args():
 		GameState.fazione_giocatore = 2
@@ -90,6 +103,11 @@ func _ready() -> void:
 			mio_leader._vesti(2)
 		for i in 4:
 			Azioni.istanza._recluta(mondo.piazza_centro() + Vector2(randf_range(-40, 40), randf_range(-40, 40)))
+	if Rete.online() and "--stanza-diag" in OS.get_cmdline_user_args():
+		await get_tree().create_timer(10.0).timeout
+		print("[online] giorno %d | morale %.0f | leader %d | ospito %s" % [
+			GameState.giorno, GameState.morale,
+			get_tree().get_nodes_in_group("player").size(), Rete.e_il_server()])
 	if Rete.in_rete:
 		print("[rete] partita avviata, sono %d, fazione %s" % [
 			multiplayer.get_unique_id(), GameState.NOMI[GameState.fazione_giocatore]])
@@ -108,8 +126,10 @@ func _genera_per(contenitore: Node2D, scena: String) -> void:
 	add_child(g)
 	g.spawn_path = g.get_path_to(contenitore)
 
-func _crea_leader(dove: Node2D, peer: int, fazione: int) -> void:
+func _crea_leader(dove: Node2D, peer: int, fazione: int, mio := true) -> void:
 	var p: Player = PLAYER.instantiate()
+	p.comando_locale = mio
+	p.fazione = fazione
 	p.name = "%d_%d" % [peer, fazione]
 	p.mondo = mondo
 	p.guardie = _guardie
@@ -136,6 +156,54 @@ func _applica_vite(gruppo: String, vite: PackedFloat32Array) -> void:
 		return   # scene ancora disallineate: si riprova al prossimo pacchetto
 	for i in nodi.size():
 		nodi[i].imposta_vita(vite[i])
+
+## Chi non ospita non simula niente: prende l'istantanea e la disegna.
+func _disegna_quello_che_arriva() -> void:
+	var d := Relay.prendi_istantanea()
+	if d.is_empty():
+		return
+	if d.has("s"):
+		GameState.applica(d["s"])
+	_fantasmi.aggiorna(d.get("z", []), d.get("g", []))
+	_vite_da_rete("barricata", d.get("b", []))
+	_vite_da_rete("edificio", d.get("e", []))
+	for voce in d.get("p", []):
+		var fazione := int(voce[0])
+		if fazione == GameState.fazione_giocatore:
+			continue          # il tuo leader lo muovi tu, non te lo detta la rete
+		var altrui := _leader_di(fazione)
+		if altrui != null:
+			altrui.position = altrui.position.lerp(
+				Vector2(float(voce[1]), float(voce[2])) / Relay.SCALA, 0.35)
+
+## Chi ospita raccoglie posizioni e richieste d'azione degli altri.
+func _comandi_dei_client() -> void:
+	for messaggio in Relay.prendi_comandi():
+		var c = JSON.parse_string(str(messaggio.get("c", "")))
+		if typeof(c) != TYPE_DICTIONARY:
+			continue
+		var fazione := int(c.get("f", -1))
+		if fazione < 0 or fazione > 2:
+			continue
+		var leader := _leader_di(fazione)
+		if leader != null and c.has("x"):
+			leader.position = Vector2(float(c["x"]), float(c["y"])) / Relay.SCALA
+		for id in c.get("a", []):
+			var chi: int = GameState.Faction.RIBELLE if GameState.deposta == fazione else fazione
+			Azioni.istanza.esegui(str(id), chi)
+
+func _leader_di(fazione: int) -> Player:
+	for g in get_tree().get_nodes_in_group("player"):
+		if g.fazione == fazione:
+			return g
+	return null
+
+func _vite_da_rete(gruppo: String, vite: Array) -> void:
+	var nodi := get_tree().get_nodes_in_group(gruppo)
+	if nodi.size() != vite.size():
+		return
+	for i in nodi.size():
+		nodi[i].imposta_vita(float(vite[i]))
 
 ## Selezione e ordini alle guardie: sinistro seleziona, destro manda.
 func _unhandled_input(evento: InputEvent) -> void:
@@ -169,6 +237,12 @@ func _illumina(nuova: GameState.Fase) -> void:
 	create_tween().tween_property(_luce, "color", colore, 2.5)
 
 func _process(delta: float) -> void:
+	if Rete.online():
+		if Rete.e_il_server():
+			_comandi_dei_client()
+		else:
+			_disegna_quello_che_arriva()
+			return
 	# in rete la partita gira in un posto solo: i client disegnano quello che
 	# ricevono, altrimenti tre simulazioni divergerebbero in pochi secondi
 	if not Rete.e_il_server():

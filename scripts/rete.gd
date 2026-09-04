@@ -69,12 +69,21 @@ func chiudi() -> void:
 	fazioni.clear()
 	lobby_cambiata.emit()
 
+## Un solo posto dove si chiede "chi comanda", qualunque sia il trasporto:
+## ENet in rete locale, staffetta HTTP online, o nessuno se si gioca da soli.
+func online() -> bool:
+	return Relay.collegato
+
 func mia_fazione() -> int:
+	if online():
+		return Relay.mia_fazione
 	if not in_rete:
 		return GameState.fazione_giocatore
 	return fazioni.get(multiplayer.get_unique_id(), 0)
 
 func e_il_server() -> bool:
+	if online():
+		return Relay.ospito
 	return not in_rete or multiplayer.is_server()
 
 func _entrato(id: int) -> void:
