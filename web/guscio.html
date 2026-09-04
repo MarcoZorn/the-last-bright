@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>$GODOT_PROJECT_NAME</title>
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: white;
+	background-color: black;
+	overflow: hidden;
+	touch-action: none;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#status, #status-splash, #status-progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+#status, #status-splash {
+	top: 0;
+	bottom: 0;
+}
+
+#status {
+	background-color: $GODOT_SPLASH_COLOR;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+}
+
+#status-splash {
+	max-height: 100%;
+	max-width: 100%;
+	margin: auto;
+}
+
+#status-splash.show-image--false {
+	display: none;
+}
+
+#status-splash.fullsize--true {
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+#status-splash.use-filter--false {
+	image-rendering: pixelated;
+}
+
+#status-progress, #status-notice {
+	display: none;
+}
+
+#status-progress {
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
+}
+
+#status-notice {
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+	line-height: 1.3;
+	margin: 0 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="status">
+			<img id="status-splash" class="$GODOT_SPLASH_CLASSES" src="$GODOT_SPLASH" alt="">
+			<progress id="status-progress"></progress>
+			<div id="status-notice"></div>
+		</div>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const statusNotice = document.getElementById('status-notice');
+
+	let initializing = true;
+	let statusMode = '';
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			statusOverlay.remove();
+			initializing = false;
+			return;
+		}
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+
+	// --- schermata di aiuto al posto dell'errore in inglese ---
+	// Godot dice "WebGL2 missing" e si ferma li'. Chi lo legge non sa cosa fare,
+	// e nove volte su dieci basta riaccendere l'accelerazione hardware.
+	function mostraAiuto(mancanti) {
+		const senzaWebGL = mancanti.some((m) => String(m).indexOf('WebGL') !== -1);
+		const d = document.createElement('div');
+		d.setAttribute('style', 'position:fixed;inset:0;overflow:auto;z-index:99;'
+			+ 'background:#12141a;color:#e8e6e0;font:15px/1.55 system-ui,sans-serif;'
+			+ '-webkit-text-size-adjust:100%;');
+		d.innerHTML = ''
+			+ '<div style="max-width:640px;margin:0 auto;padding:26px 20px 60px">'
+			+ '<h1 style="font-size:26px;color:#ffe9b8;margin:0 0 4px">The Last Bright</h1>'
+			+ '<p style="color:#9aa0ad;margin:0 0 22px">Il gioco non riesce a partire su questo dispositivo.</p>'
+			+ (senzaWebGL
+				? '<p><b>Manca WebGL2</b>, cioe\' l\'accelerazione grafica del browser. '
+					+ 'Quasi sempre e\' solo spenta e si riaccende in un minuto.</p>'
+				: '<p>Al browser mancano: <b>' + mancanti.join(', ') + '</b></p>')
+			+ '<h2 style="font-size:17px;color:#ffe9b8;margin:22px 0 6px">Chrome o Edge, su computer</h2>'
+			+ '<ol style="margin:0;padding-left:22px">'
+			+ '<li>Apri <code>chrome://settings/system</code></li>'
+			+ '<li>Accendi <b>Utilizza l\'accelerazione hardware quando disponibile</b></li>'
+			+ '<li>Riavvia il browser</li></ol>'
+			+ '<p style="color:#9aa0ad;margin:8px 0 0">Se non basta: <code>chrome://flags</code>, cerca '
+			+ '<b>Override software rendering list</b> e mettilo su <i>Enabled</i>.</p>'
+			+ '<h2 style="font-size:17px;color:#ffe9b8;margin:22px 0 6px">Firefox, su computer</h2>'
+			+ '<ol style="margin:0;padding-left:22px">'
+			+ '<li>Apri <code>about:config</code> e accetta l\'avviso</li>'
+			+ '<li>Cerca <code>webgl.disabled</code> e mettilo su <b>false</b></li>'
+			+ '<li>Cerca <code>webgl.force-enabled</code> e mettilo su <b>true</b></li>'
+			+ '<li>Riavvia Firefox</li></ol>'
+			+ '<h2 style="font-size:17px;color:#ffe9b8;margin:22px 0 6px">Android</h2>'
+			+ '<p style="margin:0">Aggiorna Chrome dal Play Store: dalla versione 90 in poi WebGL2 c\'e\' '
+			+ 'gia\'. Se hai attivo il <b>risparmio dati</b> o una <b>modalita\' risparmio energetico</b> '
+			+ 'spinta, spegnili: alcuni telefoni disattivano l\'accelerazione per risparmiare batteria. '
+			+ 'Prova anche con Firefox per Android.</p>'
+			+ '<h2 style="font-size:17px;color:#ffe9b8;margin:22px 0 6px">iPhone e iPad</h2>'
+			+ '<p style="margin:0">Serve <b>iOS 15 o superiore</b>. Poi: <b>Impostazioni &rsaquo; Safari &rsaquo; '
+			+ 'Avanzate &rsaquo; Funzionalita\' sperimentali</b> e controlla che <b>WebGL 2.0</b> sia acceso. '
+			+ 'Su iOS anche Chrome e Firefox usano il motore di Safari, quindi vale per tutti.</p>'
+			+ '<h2 style="font-size:17px;color:#ffe9b8;margin:22px 0 6px">Per capire se e\' sistemato</h2>'
+			+ '<p style="margin:0 0 18px">Apri <a href="https://get.webgl.org/webgl2/" style="color:#8fc0ff">get.webgl.org/webgl2</a>: '
+			+ 'se vedi un cubo che gira, sei a posto. Poi ricarica questa pagina.</p>'
+			+ '<button onclick="location.reload()" style="padding:12px 20px;font-size:15px;'
+			+ 'background:#2a3242;color:#e8e6e0;border:1px solid #48546b;border-radius:6px">Riprova</button>'
+			+ '<p style="color:#6c7480;margin:26px 0 0;font-size:13px">Se dopo tutto questo non parte, '
+			+ 'il dispositivo e\' troppo vecchio: scarica la versione per Windows o Linux e giocala da li\'.</p>'
+			+ '</div>';
+		document.body.appendChild(d);
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('An unknown error occurred.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+			}
+			// There's a chance that installing the service worker would fix the issue
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker already exists.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				// For some reason, `getRegistration()` can stall
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				// Reload if there was no error.
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Error while registering service worker:', err);
+			});
+		} else {
+			// invece dell'errore secco in inglese, spieghiamo cosa fare
+			mostraAiuto(missing);
+		}
+	} else {
+		setStatusMode('progress');
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					statusProgress.value = current;
+					statusProgress.max = total;
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
+				}
+			},
+		}).then(() => {
+			setStatusMode('hidden');
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>
