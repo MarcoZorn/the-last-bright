@@ -12,14 +12,15 @@ gioco, client nuovo), cercando asset 3D con licenza CC0.
 
 ## Prossimi
 
-1. **Chiudere il ciclo di bilanciamento.** `./gioca.sh sim` deve smettere di dire
-   "0 zombie uccisi": finche' nessuno muore, l'assedio e' scenografia. Capire se i
-   varchi cadono davvero e se le guardie arrivano a sparare.
-2. **Multiplayer a 3** su ENet. E' il pezzo che rende vera la politica: oggi le
-   altre due fazioni sono un'IA che sceglie fra tre priorita'.
-3. **Stealth del ribelle**: visibilita' filtrata per giocatore
-   (`MultiplayerSynchronizer`), arriva quasi gratis col multiplayer.
-4. **Schermata di fine partita** che spieghi *perche'* hai perso, con i numeri.
+1. **Il gioco e' troppo facile.** Un bot che gioca a caso vince 5 partite su 5.
+   Serve alzare la pressione finche' il pavimento non scende sotto la meta'.
+2. **Le difese non ammazzano quasi niente** (1.2 zombie a partita): quasi tutti
+   muoiono all'alba. Se il 90% degli zombie muore di sole, guardie e mura sono
+   decorazione. Il contatore "uccisi vs bruciati" in `./gioca.sh sim` dice
+   quanto e' grave.
+3. **Schermata di fine partita** che spieghi *perche'* hai perso, con i numeri.
+4. **Provare il multiplayer con tre persone vere**: finora e' verificato solo
+   con due istanze headless sulla stessa macchina.
 5. Animazioni a piu' fotogrammi (adesso c'e' solo l'ondeggio del passo).
 
 ## Fatto
@@ -35,6 +36,11 @@ gioco, client nuovo), cercando asset 3D con licenza CC0.
 - Budget di tre azioni al giorno, azioni solo di giorno: e' il costo opportunita'
   che prima non esisteva
 - Simulatore (`./gioca.sh sim`) che gioca partite intere e riporta il perche'
+- **Multiplayer a tre su ENet**: lobby, fazioni assegnate all'arrivo, i posti
+  vuoti li riempie l'IA. Movimento del leader al client, tutto il resto al
+  server. Verificato con due istanze headless: stato identico sui due lati.
+- **Stealth del ribelle**: di notte il server non manda la sua posizione agli
+  altri peer oltre i 120 pixel, e il sabotaggio non produce annuncio
 
 ## Difetti trovati dalle critiche e chiusi
 
