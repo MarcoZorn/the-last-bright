@@ -10,21 +10,6 @@ l'exe esista. Marco la vuole sempre pronta. Commit piccoli, push su origin main.
 Se la lista qui sotto si esaurisce: iniziare la versione **3D** (stessa logica di
 gioco, client nuovo), cercando asset 3D con licenza CC0.
 
-## Da chiarire con Marco
-
-Messaggio arrivato nella notte del 4/9, che **non corrisponde a questo gioco**:
-
-> "non voglio che tutti si nutrano di luce, gli animali non devono potersi
-> nutrire di luce, per quello esistono le piante. e fai il mondo gigante, ma
-> con le risorse concentrate al centro"
-
-Qui non ci sono ne' animali ne' piante ne' energia dalla luce: quella e' una
-catena alimentare da simulatore di ecosistema, probabilmente di un altro
-progetto. L'unico pezzo che potrebbe valere anche qui e' il secondo: **mondo
-piu' grande con le risorse concentrate al centro** -- renderebbe le spedizioni
-un viaggio vero invece di un timer astratto. Non l'ho implementato senza
-conferma perche' cambia la mappa e il ritmo di tutto il gioco.
-
 ## Prossimi
 
 1. **Chiudere la taratura.** Con l'ultimo giro di fix (guardie che sparano da
