@@ -56,7 +56,16 @@ var _layer := TileMapLayer.new()
 
 func _ready() -> void:
 	add_to_group("mondo")
-	griglia = FileAccess.get_file_as_string("res://assets/map.txt").strip_edges().split("\n")
+	var testo := FileAccess.get_file_as_string("res://assets/map.txt").strip_edges()
+	# map.txt e' un file di testo, non una risorsa Godot: se non viene aggiunto a
+	# `include_filter` nei preset di export finisce fuori dal pacchetto. Il gioco
+	# partiva lo stesso, con un mondo vuoto e nessuna grafica, e dall'editor
+	# sembrava tutto a posto. Meglio urlare.
+	if testo.is_empty():
+		push_error("assets/map.txt non trovato: controlla include_filter in export_presets.cfg")
+		OS.alert("Manca assets/map.txt dal pacchetto.\nControlla include_filter nei preset di export.",
+			"The Last Bright")
+	griglia = testo.split("\n")
 	altezza = griglia.size()
 	larghezza = griglia[0].length()
 	_layer.tile_set = _costruisci_tileset()
