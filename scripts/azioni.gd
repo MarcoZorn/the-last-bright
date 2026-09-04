@@ -143,6 +143,8 @@ func _speciale(nome: String, mia: int) -> void:
 			for i in 2:
 				_recluta(mondo.piazza_centro() + Vector2(randf_range(-30, 30), randf_range(-30, 30)))
 		"sabota":
+			# nessun annuncio: gli altri vedono una barricata che cede, non un
+			# colpevole. E' l'unica azione del gioco che non lascia firma.
 			var in_piedi := get_tree().get_nodes_in_group("barricata").filter(func(b): return b.in_piedi)
 			if not in_piedi.is_empty():
 				in_piedi.pick_random().subisci(Balance.BARRICATA_VITA * 0.5)

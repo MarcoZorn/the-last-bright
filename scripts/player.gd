@@ -21,6 +21,7 @@ var _direzione := Vector2.DOWN
 var _cooldown := 0.0
 var _rialzo := 0.0
 var _tempo := 0.0
+var _fra_controlli_ombra := 0.0
 
 ## L'autorita' va decisa in _enter_tree: se la si cambia in _ready il
 ## MultiplayerSynchronizer e' gia' partito senza id di rete e si lamenta.
@@ -44,6 +45,8 @@ func _vesti(f: int) -> void:
 	$Sprite2D.region_rect = Rect2(SPRITE_FAZIONE[f] * Balance.TILE, 0, Balance.TILE, Balance.TILE)
 
 func _physics_process(delta: float) -> void:
+	if Rete.in_rete and multiplayer.is_server():
+		_aggiorna_ombra(delta)
 	if not is_multiplayer_authority():
 		return
 	if a_terra:
@@ -86,6 +89,26 @@ func _scorciatoie() -> void:
 ## Fendente frontale: colpisce tutto quello che hai davanti entro il raggio.
 ## Un leader non e' un soldato -- serve a toglierti dai guai, non a reggere
 ## un'ondata da solo. Per quello ci sono i posti di guardia.
+## Il ribelle di notte sparisce dagli schermi altrui finche' non gli vai vicino.
+## Decide il server e basta: se la posizione la filtrasse il client, basterebbe
+## una console aperta per vedere dove trama.
+func _aggiorna_ombra(delta: float) -> void:
+	_fra_controlli_ombra -= delta
+	if _fra_controlli_ombra > 0.0:
+		return
+	_fra_controlli_ombra = 0.4
+	var sincro: MultiplayerSynchronizer = $Sincronizza
+	var in_ombra := GameState.deposta == fazione and GameState.fase == GameState.Fase.NOTTE
+	sincro.public_visibility = not in_ombra
+	if not in_ombra:
+		return
+	for altro in get_tree().get_nodes_in_group("player"):
+		if altro == self:
+			continue
+		var peer: int = altro.get_multiplayer_authority()
+		sincro.set_visibility_for(peer,
+			global_position.distance_to(altro.global_position) < Balance.AVVISTAMENTO_RIBELLE)
+
 func _attacca() -> void:
 	_cooldown = Balance.ATTACCO_CADENZA
 	_mostra_fendente()

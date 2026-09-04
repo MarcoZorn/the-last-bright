@@ -32,6 +32,11 @@ const ONDATA_CRESCITA := 4
 const SPAWN_RITMO := 0.8
 const ZOMBIE_MAX := 150
 
+## Quanto vicino devi essere per accorgerti del ribelle di notte. Oltre questa
+## distanza il server non manda proprio la sua posizione agli altri: non e' un
+## nascondersi di facciata, i loro client non sanno dove sia.
+const AVVISTAMENTO_RIBELLE := 120.0
+
 # --- il tuo leader ---
 const PLAYER_SPEED := 95.0
 const PLAYER_VITA := 100.0
