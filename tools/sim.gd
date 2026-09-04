@@ -5,7 +5,7 @@ extends Node
 ## e' tarato? Se il bot vince sempre e' troppo facile, se muore al giorno due
 ## e' troppo difficile.
 
-const PARTITE := 3
+const PARTITE := 1
 const VELOCITA := 30.0
 
 var _fatte := 0
@@ -21,6 +21,7 @@ func _nuova() -> void:
 	GameState.ripristina()
 	GameState.senza_umano = true
 	_inizio = Time.get_ticks_msec() / 1000.0
+	Guardia.avvicinamento_minimo = INF
 	_partita = load("res://scenes/main.tscn").instantiate()
 	add_child(_partita)
 
@@ -41,8 +42,8 @@ func _process(_delta: float) -> void:
 		"popolazione": GameState.popolazione,
 	})
 	# le colonne che contano per capire PERCHE' e' finita cosi'
-	print("  partita %d | giorno %2d | %-20s | pop %3d | colpi %4d | uccisi %3d | bruciati %3d | guardie %d (-%d) | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
-		_esiti.size(), GameState.giorno, causa, GameState.popolazione, GameState.colpi_sparati, GameState.zombie_uccisi, GameState.zombie_bruciati,
+	print("  partita %d | giorno %2d | %-20s | pop %3d | avvicinamento %4.0f | colpi %4d | uccisi %3d | bruciati %3d | guardie %d (-%d) | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
+		_esiti.size(), GameState.giorno, causa, GameState.popolazione, Guardia.avvicinamento_minimo, GameState.colpi_sparati, GameState.zombie_uccisi, GameState.zombie_bruciati,
 		guardie, GameState.guardie_perse, GameState.sicurezza, varchi_caduti, GameState.morale, GameState.denaro, GameState.viveri])
 	_partita.queue_free()
 	_partita = null

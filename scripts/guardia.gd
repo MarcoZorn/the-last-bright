@@ -193,12 +193,20 @@ func _intruso_piu_vicino() -> Node2D:
 			migliore = z
 	return migliore
 
+## `avvicinamento_minimo` e' solo diagnostica: dice quanto vicino una guardia
+## sia MAI arrivata a uno zombie. Se resta enorme mentre i colpi sono zero, il
+## problema non e' il raggio ma il fatto che non si incontrano proprio.
+static var avvicinamento_minimo := INF
+
 func _piu_vicino() -> Node2D:
 	var migliore: Node2D = null
-	var d_min: float = Balance.GUARDIA_RAGGIO[GameState.livello_guardie]
+	var portata: float = Balance.GUARDIA_RAGGIO[GameState.livello_guardie]
+	var d_min := INF
 	for z in get_tree().get_nodes_in_group("zombie"):
 		var d := global_position.distance_to(z.global_position)
 		if d < d_min:
 			d_min = d
-			migliore = z
+			if d < portata:
+				migliore = z
+	avvicinamento_minimo = minf(avvicinamento_minimo, d_min)
 	return migliore

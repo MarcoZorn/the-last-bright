@@ -235,6 +235,14 @@ func _alba_brucia() -> void:
 		+ (rimasti.size() - dentro.size()) * Balance.ABITANTI_PERSI_FUORI
 	if persi > 0:
 		GameState.perdi_abitanti(persi)
+	if "--diag" in OS.get_cmdline_user_args():
+		var celle_g := []
+		for g in get_tree().get_nodes_in_group("guardia"):
+			celle_g.append(mondo.a_cella(g.global_position))
+		var celle_z := []
+		for z in rimasti.slice(0, 6):
+			celle_z.append(mondo.a_cella(z.global_position))
+		print("[diag] alba %d | guardie %s | zombie %s" % [GameState.giorno, celle_g, celle_z])
 	GameState.zombie_bruciati += rimasti.size()
 	for z in rimasti:
 		z.brucia()

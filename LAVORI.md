@@ -10,6 +10,36 @@ l'exe esista. Marco la vuole sempre pronta. Commit piccoli, push su origin main.
 Se la lista qui sotto si esaurisce: iniziare la versione **3D** (stessa logica di
 gioco, client nuovo), cercando asset 3D con licenza CC0.
 
+## RIPARTIRE DA QUI
+
+Il difetto delle guardie **non e' ancora risolto**, ma ora si sa esattamente
+dov'e'. Ultima misura, con `godot --headless --audio-driver Dummy res://tools/sim.tscn -- --diag`:
+
+```
+[diag mov] pos=(344.0, 552.0) passo=(360.0, 536.0) vel=(48.1, -48.1) passi=19
+[diag mov] pos=(344.0, 552.0) passo=(360.0, 536.0) vel=(48.1, -48.1) passi=19
+...identico per tutta la partita...
+```
+
+Il percorso A* e' valido (19 passi verso il varco), la velocita' e' impostata
+correttamente, `move_and_slide()` viene chiamato -- e **la posizione non cambia
+mai di un pixel**. La guardia e' bloccata da qualcosa. Da qui, in ordine:
+
+1. `Guardia` e' un `CharacterBody2D` costruito da `scenes/guardia.tscn`, dove la
+   `CollisionShape2D` viene aggiunta **da codice** in `_ready` (a differenza di
+   giocatore e zombie, che ce l'hanno nella scena e si muovono benissimo).
+   Sospetto principale: la forma non e' registrata come si deve, oppure
+   `motion_mode` di default (GROUNDED) si comporta male in una vista dall'alto.
+   Provare `motion_mode = MOTION_MODE_FLOATING` e/o spostare la forma dentro la
+   scena.
+2. Verificare con `get_slide_collision_count()` chi la sta bloccando.
+3. Solo dopo, rifare la taratura: finche' le guardie non si muovono, ogni numero
+   misurato sulla difficolta' e' senza senso.
+
+Strumenti gia' pronti: `Guardia.avvicinamento_minimo` (distanza minima mai
+raggiunta fra una guardia e uno zombie -- era 150px, il raggio e' 58) e il flag
+`--diag` che a ogni alba stampa le celle di guardie e zombie.
+
 ## Prossimi
 
 1. **Chiudere la taratura.** Con l'ultimo giro di fix (guardie che sparano da
