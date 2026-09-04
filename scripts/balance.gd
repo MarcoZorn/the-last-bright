@@ -92,7 +92,7 @@ const FAME_MORALE := 12.0           # morale perso quando i viveri finiscono
 const FAME_ABITANTI := 6
 const MORALE_PER_ABITANTE_PERSO := 0.8
 const MORALE_RECUPERO_GIORNO := 3.0
-const ABITANTI_PERSI_PER_ZOMBIE := 2
+const ABITANTI_PERSI_PER_ZOMBIE := 1   # per ogni zombie ancora DENTRO le mura all'alba
 
 # --- potere e legittimita': la somma dei tre fa sempre 100, quindi guadagnare
 #     potere significa per forza toglierlo a qualcun altro ---
