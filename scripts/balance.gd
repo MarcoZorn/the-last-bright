@@ -64,8 +64,8 @@ const PATH_REFRESH := 0.6
 const SPINTA_COLPO := 110.0
 
 # --- barricate ---
-const BARRICATA_VITA := 200.0
-const BARRICATA_DANNO := 3.0
+const BARRICATA_VITA := 280.0
+const BARRICATA_DANNO := 1.6
 const RIPARA_QUANTITA := 40.0
 const RINFORZA_QUOTA := 0.34        # quanto ripara "Rinforza mura", in frazione del massimo
 const RIPARA_COSTO := 8.0
@@ -85,9 +85,11 @@ const GUARDIA_CADENZA := [1.1, 0.95, 0.8, 0.65]
 const PROIETTILE_DANNO := [2.0, 2.8, 3.6, 4.8]
 
 # --- edifici delle fazioni ---
-const EDIFICIO_VITA := 400.0
+## Un edificio di pietra non cade in una notte: deve reggere piu' assedi
+## trascurati prima di crollare, altrimenti la partita finisce al giorno due.
+const EDIFICIO_VITA := 2200.0
 const EDIFICIO_CADUTO_MORALE := 30.0
-const EDIFICIO_CADUTO_ABITANTI := 20
+const EDIFICIO_CADUTO_ABITANTI := 15
 
 # --- economia dell'alba ---
 const TASSE_PER_ABITANTE := 0.60
