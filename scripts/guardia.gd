@@ -92,6 +92,13 @@ func _physics_process(delta: float) -> void:
 		vita = vita_max()
 		_barra.aggiorna(1.0)
 
+	# Chi e' gia' a tiro si abbatte da fermi. Prima la guardia continuava a
+	# seguire il percorso mentre sparava, finendo addosso allo zombie: a quel
+	# punto perde, perche' il morso fa piu' danni di quanti ne regga.
+	if _piu_vicino() != null:
+		_percorso.clear()
+		_meta_diretta = Vector2.INF
+
 	if _percorso.size() > 1:
 		var passo := _percorso[1]
 		velocity = global_position.direction_to(passo) * Balance.GUARDIA_VELOCITA
