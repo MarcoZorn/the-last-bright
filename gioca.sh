@@ -2,6 +2,7 @@
 # The Last Bright — comandi del progetto.
 #   ./gioca.sh            avvia il gioco
 #   ./gioca.sh test       lancia tutti i controlli
+#   ./gioca.sh verifica   esporta e controlla che il build disegni davvero
 #   ./gioca.sh sim        fa giocare l'IA e riporta il bilanciamento
 #   ./gioca.sh foto       salva una panoramica in /tmp/lastbright_shot.png
 #   ./gioca.sh windows    compila l'eseguibile per Windows
@@ -32,6 +33,18 @@ case "${1:-gioca}" in
       echo "export Windows FALLITO (un altro Godot ha il progetto aperto?)" >&2
       exit 1
     fi ;;
+  verifica)
+    # l'unico controllo che avrebbe preso il bug di map.txt: eseguire il build
+    # ESPORTATO e guardare se disegna qualcosa, invece di fidarsi dell'editor
+    godot --headless --export-release "Linux" 2>&1 | grep -E "^ERROR|Failed" && exit 1
+    rm -f /tmp/lastbright_shot.png
+    xvfb-run -a ./build/linux/TheLastBright.x86_64 --audio-driver Dummy \
+      --resolution 1280x720 -- --shot >/dev/null 2>&1
+    peso=$(stat -c%s /tmp/lastbright_shot.png 2>/dev/null || echo 0)
+    if [ "$peso" -lt 40000 ]; then
+      echo "IL BUILD ESPORTATO NON DISEGNA (screenshot $peso byte)" >&2; exit 1
+    fi
+    echo "build esportato ok: disegna ($peso byte) -> /tmp/lastbright_shot.png" ;;
   linux)
     godot --headless --export-release "Linux" 2>&1 | grep -E "^ERROR|Failed" && { echo "export Linux FALLITO" >&2; exit 1; }
     ls -lh build/linux/TheLastBright.x86_64 ;;
