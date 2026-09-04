@@ -46,6 +46,11 @@ func _ready() -> void:
 	_barra.visible = false
 
 func _physics_process(delta: float) -> void:
+	# su un client lo zombie e' solo un disegno che si muove: pensare in tre
+	# posti diversi farebbe divergere le partite e triplicherebbe il costo di A*
+	if not Rete.e_il_server():
+		set_physics_process(false)
+		return
 	if mondo == null:
 		return
 	_fra_ricalcoli -= delta

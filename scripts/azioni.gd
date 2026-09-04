@@ -157,8 +157,10 @@ func _speciale(nome: String, mia: int) -> void:
 			var s := Spedizione.new()
 			add_child(s)
 
+const SCENA_GUARDIA := preload("res://scenes/guardia.tscn")
+
 func _recluta(dove: Vector2) -> void:
-	var g := Guardia.new()
+	var g: Guardia = SCENA_GUARDIA.instantiate()
 	g.mondo = mondo
 	g.global_position = mondo.centro(mondo.a_cella(dove))
-	contenitore_guardie.add_child(g)
+	contenitore_guardie.add_child(g, true)

@@ -156,9 +156,11 @@ func _costruisci() -> void:
 		return
 	if mondo.bloccato(mondo.a_cella(global_position)):
 		return
-	var g := Guardia.new()
+	# passa dal server come tutte le altre azioni, cosi' la guardia esiste per
+	# tutti e non solo sullo schermo di chi ha premuto il tasto
+	var g: Guardia = Azioni.SCENA_GUARDIA.instantiate()
 	g.mondo = mondo
-	g.global_position = mondo.centro(mondo.a_cella(global_position))
-	guardie.add_child(g)
+	g.position = mondo.centro(mondo.a_cella(global_position))
+	guardie.add_child(g, true)
 	Audio.suona("monete", -8.0)
 	GameState.modifica("denaro", -Balance.GUARDIA_COSTO)
