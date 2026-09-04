@@ -55,7 +55,15 @@ func _ready() -> void:
 	_descrizione.custom_minimum_size = Vector2(0, 46)
 	colonna.add_child(_descrizione)
 
-	_gioca = _bottone(colonna, "GIOCA DA SOLO   (le altre due fazioni le guida il computer)", _avvia)
+	# il tutorial e' la prima cosa che si vede finche' non lo si e' fatto
+	var fatto := GameState.tutorial_fatto()
+	var impara := _bottone(colonna, "IMPARA A GIOCARE   (due minuti, guidato)", _tutorial)
+	impara.custom_minimum_size = Vector2(0, 52)
+	if not fatto:
+		impara.add_theme_color_override("font_color", Color(1, 0.9, 0.6))
+	_gioca = _bottone(colonna,
+		("GIOCA DA SOLO   (le altre due fazioni le guida il computer)" if fatto
+			else "salta e gioca subito"), _avvia)
 
 	_riga_online.alignment = BoxContainer.ALIGNMENT_CENTER
 	_riga_online.add_theme_constant_override("separation", 8)
@@ -84,6 +92,8 @@ func _ready() -> void:
 	_scegli(0)
 	if "--menu" in OS.get_cmdline_user_args():
 		_scatta.call_deferred()
+	elif "--tutorial" in OS.get_cmdline_user_args():
+		_tutorial.call_deferred()
 	elif "--shot" in OS.get_cmdline_user_args():
 		_avvia.call_deferred()
 	_da_riga_di_comando.call_deferred()
@@ -146,7 +156,15 @@ func _aggiorna() -> void:
 	_entra.disabled = true
 	_codice.editable = false
 
+func _tutorial() -> void:
+	GameState.ripristina()
+	GameState.fazione_giocatore = _scelta
+	GameState.tutorial = true
+	GameState.tutorial_notte = false
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
+
 func _avvia() -> void:
+	GameState.tutorial = false
 	if Relay.collegato:
 		_avvia_online()
 		return

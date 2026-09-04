@@ -38,6 +38,15 @@ sparatutto. Non e' pignoleria: e' la premessa perche' il ribelle
 possa avere informazioni che gli altri non hanno, senza che bastino gli
 strumenti da sviluppatore per sbirciare.
 
+## La prima volta
+
+Nel menu, la prima voce e' **IMPARA A GIOCARE**: un tutorial guidato di un paio
+di minuti che non ti fa leggere, ti fa fare. Ogni passo aspetta che tu compia
+davvero l'azione -- muoverti, riparare una barricata, reclutare una guardia,
+usare un'azione della tua fazione, ammazzare il primo zombie. La notte non
+arriva finche' non sei pronto. Si puo' saltare in qualunque momento, e una volta
+finito il menu smette di proporlo.
+
 ## In due righe
 
 Governi una citta'-stato assediata insieme ad altre due fazioni. Di giorno
