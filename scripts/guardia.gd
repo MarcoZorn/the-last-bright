@@ -153,12 +153,17 @@ func _presidia(delta: float) -> void:
 		return
 
 	# 2. altrimenti il varco che sta cedendo, o il piu' vicino ancora in piedi
+	# Solo le porte della citta'. Il checkpoint del ponte sta oltre il fiume: con
+	# il vecchio bonus da 600px le guardie ci andavano SEMPRE, e passavano la
+	# notte a camminare avanti e indietro senza sparare un colpo.
+	var citta: Rect2 = mondo.dentro_le_mura.grow(Balance.TILE * 2.0)
 	var meta: Barricata = null
 	var d_min := INF
 	for b in get_tree().get_nodes_in_group("barricata"):
-		if not b.in_piedi:
+		if not b.in_piedi or not citta.has_point(b.centro_varco()):
 			continue
-		var d: float = b.distanza(global_position) - (600.0 if b.sotto_attacco > 0.0 else 0.0)
+		# preferisci quello sotto attacco, ma non a costo di attraversare la citta'
+		var d: float = b.distanza(global_position) - (150.0 if b.sotto_attacco > 0.0 else 0.0)
 		if d < d_min:
 			d_min = d
 			meta = b
