@@ -43,7 +43,7 @@ gioco, client nuovo), cercando asset 3D con licenza CC0.
 - **Stealth del ribelle**: di notte il server non manda la sua posizione agli
   altri peer oltre i 120 pixel, e il sabotaggio non produce annuncio
 
-## Il caso delle guardie che non sparavano
+## Il caso delle guardie che non sparavano (risolto in cinque giri)
 
 Vale la pena ricordarlo perche' e' costato quattro giri di simulazione. Il
 sintomo era "0% di zombie ammazzati". Le ipotesi sbagliate, in ordine: raggio
@@ -52,8 +52,21 @@ Il test isolato (`tools/test_guardia.tscn`) ha smontato le prime tre mostrando
 che una guardia da sola raggiunge un varco a 218px e uccide. La causa vera era
 il bonus di priorita' da 600px per i varchi sotto attacco: mandava sempre tutte
 le guardie al checkpoint del ponte, che sta oltre il fiume, e passavano la notte
-a camminare. Morale: quando i numeri aggregati non tornano, isolare prima di
-tarare.
+a camminare. Poi ne sono emerse altre due, ognuna trovata aggiungendo il contatore giusto
+invece di ipotizzare:
+
+- **guardie perse: 0** -> non morivano in mischia, semplicemente non ingaggiavano
+- **colpi sparati: 0, 12, 25 in tutta la partita** -> ingaggiavano per pochi
+  secondi in otto giorni
+
+La causa finale: `vai_a` ripiega su una rotta in linea retta quando A* non trova
+strada (serve per uscire dai cancelli, che A* considera chiusi), ma quella meta
+non scadeva mai. Una guardia mandata verso uno zombie dall'altro lato del muro
+ci si incastrava contro e non riconsiderava piu' nulla per il resto della
+partita. Adesso la meta diretta scade dopo sei secondi.
+
+Morale: quando i numeri aggregati non tornano, isolare prima di tarare -- e
+aggiungere il contatore che distingue le ipotesi, invece di provarle a caso.
 
 ## Difetti trovati dalle critiche e chiusi
 
