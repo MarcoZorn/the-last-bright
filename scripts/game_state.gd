@@ -30,7 +30,8 @@ var giorno: int = 1
 var tempo_fase: float = 0.0
 var zombie_uccisi: int = 0
 var zombie_bruciati: int = 0
-var guardie_perse: int = 0     # quante ne hai perse: dice se muoiono prima di servire   # morti all'alba invece che ammazzati: dice se le difese servono
+var guardie_perse: int = 0
+var colpi_sparati: int = 0     # distingue "non ingaggiano mai" da "ingaggiano e non bastano"     # quante ne hai perse: dice se muoiono prima di servire   # morti all'alba invece che ammazzati: dice se le difese servono
 var finita := false
 var vinta := false
 
@@ -167,6 +168,7 @@ func ripristina() -> void:
 	zombie_uccisi = 0
 	zombie_bruciati = 0
 	guardie_perse = 0
+	colpi_sparati = 0
 	finita = false
 	vinta = false
 	Spedizione.in_corso = 0
@@ -177,7 +179,7 @@ func ripristina() -> void:
 ## servira', basta filtrare questo dizionario per destinatario invece di
 ## spedirlo uguale a tutti.
 const CAMPI := ["morale", "denaro", "viveri", "sicurezza", "popolazione", "potere",
-	"deposta", "giorno", "fase", "tempo_fase", "zombie_uccisi", "zombie_bruciati", "guardie_perse", "livello_guardie",
+	"deposta", "giorno", "fase", "tempo_fase", "zombie_uccisi", "zombie_bruciati", "guardie_perse", "colpi_sparati", "livello_guardie",
 	"addestramenti", "azioni_usate", "finita", "vinta"]
 
 func istantanea() -> Dictionary:

@@ -5,7 +5,7 @@ extends Node
 ## e' tarato? Se il bot vince sempre e' troppo facile, se muore al giorno due
 ## e' troppo difficile.
 
-const PARTITE := 5
+const PARTITE := 3
 const VELOCITA := 30.0
 
 var _fatte := 0
@@ -37,12 +37,12 @@ func _process(_delta: float) -> void:
 		"giorno": GameState.giorno, "vinta": GameState.vinta, "causa": causa,
 		"morale": GameState.morale, "denaro": GameState.denaro, "viveri": GameState.viveri,
 		"uccisi": GameState.zombie_uccisi, "bruciati": GameState.zombie_bruciati, "deposta": GameState.deposta,
-		"guardie": guardie, "perse": GameState.guardie_perse, "mura": GameState.sicurezza, "varchi_caduti": varchi_caduti,
+		"guardie": guardie, "perse": GameState.guardie_perse, "colpi": GameState.colpi_sparati, "mura": GameState.sicurezza, "varchi_caduti": varchi_caduti,
 		"popolazione": GameState.popolazione,
 	})
 	# le colonne che contano per capire PERCHE' e' finita cosi'
-	print("  partita %d | giorno %2d | %-20s | pop %3d | uccisi %3d | bruciati %3d | guardie %d (-%d) | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
-		_esiti.size(), GameState.giorno, causa, GameState.popolazione, GameState.zombie_uccisi, GameState.zombie_bruciati,
+	print("  partita %d | giorno %2d | %-20s | pop %3d | colpi %4d | uccisi %3d | bruciati %3d | guardie %d (-%d) | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
+		_esiti.size(), GameState.giorno, causa, GameState.popolazione, GameState.colpi_sparati, GameState.zombie_uccisi, GameState.zombie_bruciati,
 		guardie, GameState.guardie_perse, GameState.sicurezza, varchi_caduti, GameState.morale, GameState.denaro, GameState.viveri])
 	_partita.queue_free()
 	_partita = null

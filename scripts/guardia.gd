@@ -95,7 +95,8 @@ func _physics_process(delta: float) -> void:
 	# Chi e' gia' a tiro si abbatte da fermi. Prima la guardia continuava a
 	# seguire il percorso mentre sparava, finendo addosso allo zombie: a quel
 	# punto perde, perche' il morso fa piu' danni di quanti ne regga.
-	if _piu_vicino() != null:
+	var preda := _piu_vicino()
+	if preda != null:
 		_percorso.clear()
 		_meta_diretta = Vector2.INF
 
@@ -116,13 +117,13 @@ func _physics_process(delta: float) -> void:
 	Grafica.passo(_sprite, velocity, _tempo)
 
 	_cooldown -= delta
-	var preda := _piu_vicino()
 	if preda == null:
 		_presidia(delta)
 		return
 	if _cooldown > 0.0:
 		return
 	_cooldown = Balance.GUARDIA_CADENZA[GameState.livello_guardie]
+	GameState.colpi_sparati += 1
 	Audio.suona("sparo", -20.0)
 	var p := Proiettile.new()
 	p.bersaglio = preda
