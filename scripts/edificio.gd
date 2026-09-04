@@ -37,6 +37,15 @@ func _ready() -> void:
 func attaccabile() -> bool:
 	return in_piedi
 
+## Usata dai client per allinearsi al server senza rieseguire la logica.
+func imposta_vita(v: float) -> void:
+	if is_equal_approx(v, vita):
+		return
+	vita = v
+	_barra.aggiorna(vita / Balance.EDIFICIO_VITA)
+	if vita <= 0.0 and in_piedi:
+		_crolla()
+
 func distanza(p: Vector2) -> float:
 	var d := INF
 	for c in celle:

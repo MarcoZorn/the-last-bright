@@ -37,6 +37,19 @@ func _crea_barra() -> void:
 func attaccabile() -> bool:
 	return in_piedi
 
+## Usata dai client per allinearsi al server senza rieseguire la logica.
+func imposta_vita(v: float) -> void:
+	if is_equal_approx(v, vita):
+		return
+	vita = v
+	_barra.aggiorna(vita / Balance.BARRICATA_VITA)
+	if vita <= 0.0 and in_piedi:
+		in_piedi = false
+		_apri()
+	elif vita > 0.0 and not in_piedi:
+		in_piedi = true
+		_chiudi()
+
 func _process(d: float) -> void:
 	sotto_attacco = maxf(sotto_attacco - d, 0.0)
 

@@ -116,6 +116,27 @@ func _crea_leader(dove: Node2D, peer: int, fazione: int) -> void:
 	p.position = mondo.piazza_centro() + Vector2(randf_range(-24, 24), randf_range(-24, 24))
 	dove.add_child(p, true)
 
+## Barricate ed edifici nascono uguali su tutti i peer, dalla stessa mappa e
+## nello stesso ordine: per tenerli allineati basta spedire le vite in fila,
+## senza replicare i nodi.
+func _vite(gruppo: String) -> PackedFloat32Array:
+	var v := PackedFloat32Array()
+	for n in get_tree().get_nodes_in_group(gruppo):
+		v.append(n.vita)
+	return v
+
+@rpc("authority", "call_remote", "unreliable_ordered")
+func _stato_strutture(varchi: PackedFloat32Array, poli: PackedFloat32Array) -> void:
+	_applica_vite("barricata", varchi)
+	_applica_vite("edificio", poli)
+
+func _applica_vite(gruppo: String, vite: PackedFloat32Array) -> void:
+	var nodi := get_tree().get_nodes_in_group(gruppo)
+	if nodi.size() != vite.size():
+		return   # scene ancora disallineate: si riprova al prossimo pacchetto
+	for i in nodi.size():
+		nodi[i].imposta_vita(vite[i])
+
 ## Selezione e ordini alle guardie: sinistro seleziona, destro manda.
 func _unhandled_input(evento: InputEvent) -> void:
 	if not (evento is InputEventMouseButton and evento.pressed):
@@ -157,6 +178,7 @@ func _process(delta: float) -> void:
 		if _fra_istantanee <= 0.0:
 			_fra_istantanee = 0.25
 			GameState.applica.rpc(GameState.istantanea())
+			_stato_strutture.rpc(_vite("barricata"), _vite("edificio"))
 	if GameState.finita:
 		if Input.is_action_just_pressed("ricomincia"):
 			GameState.ripristina()
@@ -210,6 +232,7 @@ func _alba_brucia() -> void:
 	var dentro := rimasti.filter(func(z): return mondo.dentro_le_mura.has_point(z.global_position))
 	if not dentro.is_empty():
 		GameState.perdi_abitanti(dentro.size() * Balance.ABITANTI_PERSI_PER_ZOMBIE)
+	GameState.zombie_bruciati += rimasti.size()
 	for z in rimasti:
 		z.brucia()
 	_da_spawnare = 0
