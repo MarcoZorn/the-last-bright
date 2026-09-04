@@ -216,19 +216,25 @@ func _aggiorna_azioni() -> void:
 			c.queue_free()
 		var elenco := Azioni.istanza.per_fazione(mia)
 		for i in mini(elenco.size(), 6):
-			var scatola := PanelContainer.new()
+			# Button e non PanelContainer: col dito i tasti 1-6 non esistono
+			var scatola := Button.new()
+			scatola.custom_minimum_size = Vector2(150, 58)
+			scatola.pressed.connect(Azioni.istanza.esegui.bind(elenco[i]["id"]))
 			var testo := Label.new()
 			testo.name = "testo"
 			testo.add_theme_font_size_override("font_size", 11)
-			testo.custom_minimum_size = Vector2(150, 58)
+			testo.custom_minimum_size = Vector2(146, 56)
 			testo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			testo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			scatola.add_child(testo)
 			_barra_azioni.add_child(scatola)
 
 	var elenco2 := Azioni.istanza.per_fazione(mia)
 	for i in _barra_azioni.get_child_count():
 		var a: Dictionary = elenco2[i]
-		var testo: Label = _barra_azioni.get_child(i).get_node("testo")
+		var scatola: Button = _barra_azioni.get_child(i)
+		var testo: Label = scatola.get_node("testo")
+		scatola.disabled = not Azioni.istanza.eseguibile(a["id"])
 		var quota := Azioni.istanza.quota_ricarica(a["id"])
 		var coda := ""
 		if GameState.fase != GameState.Fase.GIORNO:
