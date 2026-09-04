@@ -10,11 +10,14 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 GameState="*res://scripts/game_state.gd"
 Audio="*res://scripts/audio.gd"
 Rete="*res://scripts/rete.gd"
+Relay="*res://scripts/relay.gd"
 
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
 
 [rendering]
 renderer/rendering_method="gl_compatibility"

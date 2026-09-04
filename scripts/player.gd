@@ -6,6 +6,9 @@ class_name Player
 
 ## 0 Chiesa, 1 Governo, 2 Esercito
 @export_enum("Chiesa", "Governo", "Esercito") var fazione: int = 0
+## true solo sul leader che muovi tu. Offline e' il tuo; in rete locale lo
+## decide l'autorita' Godot; online lo assegna chi crea i nodi.
+var comando_locale := true
 
 ## Colonne in assets/sprites.png: mitra dorata, tuba, elmo con cresta.
 ## Devono dire a colpo d'occhio CHI sei, non solo che sei un personaggio.
@@ -35,7 +38,9 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	add_to_group("player")
-	if is_multiplayer_authority():
+	if Rete.in_rete:
+		comando_locale = is_multiplayer_authority()
+	if comando_locale:
 		add_to_group("mio")
 	add_to_group("danneggiabile")
 	_vesti(fazione)
@@ -47,7 +52,7 @@ func _vesti(f: int) -> void:
 func _physics_process(delta: float) -> void:
 	if Rete.in_rete and multiplayer.is_server():
 		_aggiorna_ombra(delta)
-	if not is_multiplayer_authority():
+	if not comando_locale:
 		return
 	if a_terra:
 		_rialzo -= delta
@@ -56,7 +61,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_cooldown -= delta
-	var dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	# su telefono la levetta a schermo prende il posto della tastiera
+	var dir := Tocco.direzione if Tocco.direzione != Vector2.ZERO \
+		else Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	if dir != Vector2.ZERO:
 		_direzione = dir
 	velocity = dir * Balance.PLAYER_SPEED
