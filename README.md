@@ -111,10 +111,19 @@ godot -- --unisciti=127.0.0.1        # in un altro
 Il manuale completo e' in [MANUALE.md](MANUALE.md), e si apre anche dentro il
 gioco col tasto **H**.
 
+### A te, su Linux
+
+```bash
+./gioca.sh linux
+```
+
+Produce `build/linux/TheLastBright.x86_64`: **74 MB, un file solo**, motore
+incluso. Si lancia con un doppio clic o da terminale, senza installare Godot.
+
 ### A un amico con Windows
 
 ```bash
-godot --headless --export-release "Windows Desktop"
+./gioca.sh windows
 ```
 
 Produce `build/windows/TheLastBright.exe`: **un unico file da ~105 MB**, con il
@@ -126,7 +135,7 @@ usa WeTransfer o una Release di GitHub -- via mail non passa.
 ### Sul web
 
 ```bash
-godot --headless --export-release "Web"
+./gioca.sh web      # compila e serve su localhost:8777
 ```
 
 Produce `build/web/`. E' compilato **senza thread**, quindi gira su qualunque
@@ -156,4 +165,5 @@ Per metterlo online, in ordine di comodita':
 3. **Netlify / Cloudflare Pages** — trascini la cartella `build/web` nella loro
    pagina di upload e ti danno un link. Zero configurazione, repo privato.
 
-> `build/` non e' versionato: sono ~150 MB di roba rigenerabile con due comandi.
+> `build/` non e' versionato: sono ~220 MB di roba rigenerabile con un comando.
+> macOS non c'e': l'export fallisce senza un Mac su cui firmarlo, e nessuno di noi ne ha uno.
