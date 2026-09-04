@@ -177,6 +177,7 @@ func _ripara() -> void:
 	for b in get_tree().get_nodes_in_group("barricata"):
 		if b.distanza(global_position) < PORTATA_RIPARAZIONE and b.vita < Balance.BARRICATA_VITA:
 			b.ripara(Balance.RIPARA_QUANTITA)
+			GameState.riparazioni += 1
 			Audio.suona("riparazione", -8.0)
 			GameState.modifica("denaro", -Balance.RIPARA_COSTO)
 			return

@@ -33,13 +33,32 @@ var zombie_bruciati: int = 0
 var guardie_perse: int = 0
 var colpi_sparati: int = 0     # distingue "non ingaggiano mai" da "ingaggiano e non bastano"     # quante ne hai perse: dice se muoiono prima di servire   # morti all'alba invece che ammazzati: dice se le difese servono
 var finita := false
+var riparazioni: int = 0      # lo guarda il tutorial
+var tutorial := false
+var tutorial_notte := false   # il tutorial tiene ferma la notte finche' non serve
 var vinta := false
 
 signal fase_cambiata(nuova: Fase)
 signal annuncio(testo: String, colore: Color)
 
+const RICORDI := "user://stato.cfg"
+
 func _ready() -> void:
 	_registra_tasti()
+
+## Un pizzico di memoria fra una partita e l'altra: serve solo a non riproporre
+## il tutorial a chi l'ha gia' fatto.
+func tutorial_fatto() -> bool:
+	var c := ConfigFile.new()
+	if c.load(RICORDI) != OK:
+		return false
+	return bool(c.get_value("gioco", "tutorial_fatto", false))
+
+func segna_tutorial_fatto() -> void:
+	var c := ConfigFile.new()
+	c.load(RICORDI)
+	c.set_value("gioco", "tutorial_fatto", true)
+	c.save(RICORDI)
 
 ## La fazione che stai giocando davvero: se ti hanno deposto, giochi da ribelle.
 func fazione_effettiva() -> int:
@@ -171,6 +190,7 @@ func ripristina() -> void:
 	colpi_sparati = 0
 	finita = false
 	vinta = false
+	riparazioni = 0
 	Spedizione.in_corso = 0
 
 ## --- replica ---

@@ -94,6 +94,8 @@ func _ready() -> void:
 
 	add_child(preload("res://scripts/hud.gd").new())
 	add_child(preload("res://scripts/tocco.gd").new())
+	if GameState.tutorial:
+		add_child(preload("res://scripts/tutorial.gd").new())
 
 	if "--esercito" in OS.get_cmdline_user_args():
 		GameState.fazione_giocatore = 2
@@ -266,6 +268,8 @@ func _process(delta: float) -> void:
 	var poli := get_tree().get_nodes_in_group("edificio")
 	if not poli.is_empty() and poli.all(func(e): return not e.in_piedi):
 		GameState.finita = true
+	if GameState.tutorial and not GameState.tutorial_notte:
+		GameState.tempo_fase = 0.0
 	if GameState.fase == GameState.Fase.GIORNO:
 		if GameState.tempo_fase >= Balance.giorno_durata(GameState.giorno):
 			_inizia_notte()
