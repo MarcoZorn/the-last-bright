@@ -58,12 +58,14 @@ func _physics_process(delta: float) -> void:
 		_fra_ricalcoli = Balance.PATH_REFRESH
 		_ripianifica()
 
+	$Sprite2D.position = Vector2.ZERO   # lo scatto del morso vale un frame solo
 	var preda := _preda_a_portata()
 	if preda != null:
 		velocity = Vector2.ZERO
 		preda.subisci(_danno_contro(preda) * delta)
 		if not (preda is Player or preda is Guardia):
 			Audio.suona("morso_mura", -18.0)
+		_morde(preda, delta)
 	elif _percorso.size() > 1:
 		var passo := _percorso[1]
 		velocity = global_position.direction_to(passo) * velocita
@@ -111,6 +113,23 @@ func _preda_a_portata() -> Node2D:
 			d_min = d
 			migliore = n
 	return migliore
+
+## Uno zombie che morde stava immobile come uno bloccato: si vedeva solo la
+## barra della barricata scendere. Adesso si sporge a scatti verso quello che
+## sta mangiando, cosi' un assedio si distingue da un difetto.
+func _morde(preda: Node2D, delta: float) -> void:
+	_tempo += delta
+	var verso := global_position.direction_to(
+		preda.global_position if preda is Player or preda is Guardia
+		else global_position + Vector2(0, -1))
+	if preda.has_method("distanza"):
+		verso = global_position.direction_to(_verso_preda(preda))
+	$Sprite2D.position = verso * (2.5 + 2.5 * sin(_tempo * 9.0))
+
+func _verso_preda(preda: Node2D) -> Vector2:
+	if preda is Barricata:
+		return preda.centro_varco()
+	return preda.global_position
 
 func _danno_contro(preda: Node2D) -> float:
 	if preda is Player:

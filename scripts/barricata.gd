@@ -23,6 +23,7 @@ func _ready() -> void:
 			if not mondo.bloccato(c + d):
 				_approcci.append(mondo.centro(c + d))
 	_crea_barra()
+	_crea_velo()
 
 ## Barra di vita sopra il varco: senza, non si capisce quale porta sta cedendo.
 func _crea_barra() -> void:
@@ -50,7 +51,32 @@ func imposta_vita(v: float) -> void:
 		in_piedi = true
 		_chiudi()
 
+## Un lampo rosso sul varco: da lontano dice "qui stanno sfondando" senza che
+## tu debba accorgerti della barra che cala. E' una velatura sopra le celle di
+## QUESTA barricata: tingere il tile avrebbe colorato tutti i varchi insieme,
+## perche' i dati del tile sono condivisi da tutte le celle uguali.
+var _velo: ColorRect
+
+func _crea_velo() -> void:
+	var minimo: Vector2i = celle[0]
+	var massimo: Vector2i = celle[0]
+	for c in celle:
+		minimo = minimo.min(c)
+		massimo = massimo.max(c)
+	_velo = ColorRect.new()
+	_velo.color = Color(1.0, 0.35, 0.3, 0.0)
+	_velo.position = Vector2(minimo) * Balance.TILE
+	_velo.size = Vector2(massimo - minimo + Vector2i.ONE) * Balance.TILE
+	_velo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_velo)
+
+func _lampeggia() -> void:
+	if _velo != null:
+		_velo.color.a = 0.5
+
 func _process(d: float) -> void:
+	if _velo != null and _velo.color.a > 0.0:
+		_velo.color.a = maxf(_velo.color.a - d * 2.2, 0.0)
 	sotto_attacco = maxf(sotto_attacco - d, 0.0)
 
 ## Punto medio del varco: lo usa l'HUD per la freccia di allarme.
@@ -81,6 +107,7 @@ func subisci(quanto: float, _spinta := Vector2.ZERO) -> void:
 	if not in_piedi:
 		return
 	sotto_attacco = 2.0
+	_lampeggia()
 	vita -= quanto
 	_barra.aggiorna(vita / Balance.BARRICATA_VITA)
 	if vita <= 0.0:
