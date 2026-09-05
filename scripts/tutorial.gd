@@ -48,20 +48,24 @@ func _definisci() -> void:
 		+ "In basso a destra c'e' la minimappa: serve a vedere dove stai perdendo."},
 
 	{"t": "RIPARA UNA BARRICATA.\n\n"
-		+ "Vai su una delle porte nelle mura e premi E (o il pulsante RIPARA).\n"
-		+ "Costa 8 denaro. Le barricate sono l'unica cosa fra te e loro.",
+		+ "Ne ho appena danneggiata una: e' quella con la barra rossa sulle mura.\n"
+		+ "Vai vicino e premi E (o il pulsante RIPARA). Costa 8 denaro.\n\n"
+		+ "Le barricate sono l'unica cosa fra te e loro.",
+		"inizia": func(): _rompi_una_barricata(),
 		"fatto": func(): return GameState.riparazioni > 0},
 
 	{"t": "RECLUTA UNA GUARDIA.\n\n"
 		+ "Premi Q (o il pulsante GUARDIA). Costa 35 denaro.\n\n"
 		+ "Le guardie vanno da sole al varco piu' minacciato e sparano da ferme.\n"
 		+ "Puoi anche selezionarle col clic e mandarle dove vuoi col destro.",
+		"inizia": func(): _garantisci_denaro(Balance.GUARDIA_COSTO + 20.0),
 		"fatto": func(): return get_tree().get_nodes_in_group("guardia").size() > _guardie_iniziali},
 
 	{"t": "USA UN'AZIONE DELLA TUA FAZIONE.\n\n"
 		+ "Sono i riquadri in basso: premi 1-6, oppure toccali.\n\n"
 		+ "Ne hai TRE al giorno, e solo di giorno. Questo e' il vero costo del\n"
 		+ "gioco: fare una cosa vuol dire non farne un'altra.",
+		"inizia": func(): _prepara_azioni(),
 		"fatto": func(): return GameState.azioni_usate[GameState.fazione_effettiva()] > _azioni_iniziali},
 
 	{"t": "IL POTERE E' A SOMMA ZERO.\n\n"
@@ -88,9 +92,47 @@ func _definisci() -> void:
 func _mio() -> Player:
 	return get_tree().get_first_node_in_group("mio")
 
+## --- ogni passo si prepara le condizioni per poter essere completato ---
+## Senza questo il tutorial chiedeva di riparare una barricata quando erano
+## tutte intere, e restava bloccato li' per sempre.
+
+func _rompi_una_barricata() -> void:
+	var vicina: Barricata = null
+	var d_min := INF
+	var qui: Vector2 = _mio().global_position if _mio() != null else Vector2.ZERO
+	for b in get_tree().get_nodes_in_group("barricata"):
+		if not b.in_piedi:
+			continue
+		var d: float = b.distanza(qui)
+		if d < d_min:
+			d_min = d
+			vicina = b
+	if vicina != null:
+		vicina.subisci(Balance.BARRICATA_VITA * 0.55)
+	_garantisci_denaro(Balance.RIPARA_COSTO + 20.0)
+
+func _garantisci_denaro(quanto: float) -> void:
+	if GameState.denaro < quanto:
+		GameState.denaro = quanto
+
+## L'azione dev'essere davvero disponibile: soldi in cassa, budget del giorno
+## intero e nessuna ricarica in corso.
+func _prepara_azioni() -> void:
+	_garantisci_denaro(120.0)
+	GameState.viveri = maxf(GameState.viveri, 100.0)
+	GameState.azioni_usate = [0, 0, 0, 0]
+	Azioni.istanza.azzera_ricariche()
+
 func _chiama_la_notte() -> void:
 	GameState.tutorial_notte = true
 	GameState.tempo_fase = Balance.giorno_durata(GameState.giorno)
+	# tre zombie a due passi, invece di farli attraversare mezza mappa
+	# il genitore e' sempre la scena di gioco: `current_scene` non lo e' quando
+	# il tutorial gira dentro un test
+	var g := _mio()
+	var principale := get_parent()
+	if g != null and principale != null and principale.has_method("genera_vicino"):
+		principale.genera_vicino(g.global_position, 3)
 
 func _costruisci() -> void:
 	var telaio := Control.new()

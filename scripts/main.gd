@@ -317,10 +317,16 @@ func _alba_brucia() -> void:
 		var celle_g := []
 		for g in get_tree().get_nodes_in_group("guardia"):
 			celle_g.append(mondo.a_cella(g.global_position))
-		var celle_z := []
-		for z in rimasti.slice(0, 6):
-			celle_z.append(mondo.a_cella(z.global_position))
-		print("[diag] alba %d | guardie %s | zombie %s" % [GameState.giorno, celle_g, celle_z])
+		var dove := {}
+		for z in rimasti:
+			var ch := mondo.carattere(mondo.a_cella(z.global_position))
+			var stato := "cammina"
+			if z.velocity.length() < 2.0:
+				stato = "morde" if z._preda_a_portata() != null else "FERMO-SENZA-MOTIVO"
+			var chiave := "%s:%s" % [ch, stato]
+			dove[chiave] = int(dove.get(chiave, 0)) + 1
+		print("[diag] alba %d | guardie %s | zombie per casella: %s" % [
+			GameState.giorno, celle_g.size(), dove])
 	GameState.zombie_bruciati += rimasti.size()
 	for z in rimasti:
 		z.brucia()
@@ -328,6 +334,17 @@ func _alba_brucia() -> void:
 	if not rimasti.is_empty():
 		GameState.annuncio.emit("L'alba ne brucia %d, ma sono costati %d abitanti" % [rimasti.size(), persi], Color(1, 0.6, 0.35))
 	GameState.cambia_fase(GameState.Fase.GIORNO)
+
+## Usata dal tutorial: qualche zombie subito addosso, senza aspettare l'ondata.
+func genera_vicino(dove: Vector2, quanti: int) -> void:
+	for i in quanti:
+		var z: Zombie = ZOMBIE.instantiate()
+		z.mondo = mondo
+		var poli := get_tree().get_nodes_in_group("edificio").filter(func(e): return e.in_piedi)
+		if not poli.is_empty():
+			z.edificio_bersaglio = poli.pick_random()
+		z.position = dove + Vector2.RIGHT.rotated(TAU * i / float(quanti)) * 70.0
+		_zombie.add_child(z, true)
 
 func _genera() -> void:
 	# i primi giorni arrivano solo dal ponte; poi la citta' si scopre circondata

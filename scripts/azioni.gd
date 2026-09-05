@@ -24,6 +24,10 @@ func _process(delta: float) -> void:
 		if _ricarica[chiave] > 0.0:
 			_ricarica[chiave] = maxf(_ricarica[chiave] - delta, 0.0)
 
+## Il tutorial la usa per garantire che l'azione richiesta sia davvero pronta.
+func azzera_ricariche() -> void:
+	_ricarica.clear()
+
 func per_fazione(fazione: int) -> Array:
 	return Balance.AZIONI.filter(func(a): return a["fazione"] == fazione or a["fazione"] == -1)
 

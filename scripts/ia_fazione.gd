@@ -17,7 +17,7 @@ func _fazioni_umane() -> Array:
 	return [GameState.fazione_giocatore]
 
 func _process(delta: float) -> void:
-	if GameState.finita or GameState.fase != GameState.Fase.GIORNO:
+	if GameState.finita or GameState.tutorial or GameState.fase != GameState.Fase.GIORNO:
 		return
 	if not Rete.e_il_server():
 		return          # in rete decide il server, altrimenti si accavallano
