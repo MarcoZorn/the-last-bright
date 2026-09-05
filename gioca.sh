@@ -21,6 +21,7 @@ case "${1:-gioca}" in
     godot --headless res://tools/test_assedio.tscn 2>&1 | grep -E "^OK|error" || true
     godot --headless res://tools/test_potere.tscn  2>&1 | grep -E "^OK|error" || true
     godot --headless res://tools/test_guardia.tscn 2>&1 | grep -E "^OK|error" || true
+    godot --headless --audio-driver Dummy res://tools/test_tutorial.tscn 2>&1 | grep -E "^OK|error" || true
     ;;
   sim)     godot --headless --audio-driver Dummy res://tools/sim.tscn 2>&1 | grep -vE "^\s*$" ;;
   foto)    "${FOTO[@]}" -- --shot "${@:2}" >/dev/null 2>&1; echo "/tmp/lastbright_shot.png" ;;
