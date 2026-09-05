@@ -218,6 +218,7 @@ func _aggiorna_azioni() -> void:
 		for i in mini(elenco.size(), 6):
 			# Button e non PanelContainer: col dito i tasti 1-6 non esistono
 			var scatola := Button.new()
+			scatola.focus_mode = Control.FOCUS_NONE
 			scatola.custom_minimum_size = Vector2(150, 58)
 			scatola.pressed.connect(Azioni.istanza.esegui.bind(elenco[i]["id"]))
 			var testo := Label.new()

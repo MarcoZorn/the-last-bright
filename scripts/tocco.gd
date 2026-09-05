@@ -56,6 +56,7 @@ func _cerchio(raggio: float, colore: Color) -> Control:
 
 func _bottone(genitore: Control, testo: String, dove: Vector2, dim: Vector2, azione: String) -> void:
 	var b := Button.new()
+	b.focus_mode = Control.FOCUS_NONE
 	b.text = testo
 	b.position = dove
 	b.custom_minimum_size = dim
