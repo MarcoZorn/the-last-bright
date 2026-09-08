@@ -46,12 +46,12 @@ func _process(_delta: float) -> void:
 		"giorno": GameState.giorno, "vinta": GameState.vinta, "causa": causa,
 		"morale": GameState.morale, "denaro": GameState.denaro, "viveri": GameState.viveri,
 		"uccisi": GameState.zombie_uccisi, "bruciati": GameState.zombie_bruciati, "deposta": GameState.deposta,
-		"guardie": guardie, "perse": GameState.guardie_perse, "colpi": GameState.colpi_sparati, "mura": GameState.sicurezza, "varchi_caduti": varchi_caduti,
+		"guardie": guardie, "perse": GameState.guardie_perse, "colpi": GameState.colpi_sparati, "blocchi": GameState.blocchi, "mura": GameState.sicurezza, "varchi_caduti": varchi_caduti,
 		"popolazione": GameState.popolazione,
 	})
 	# le colonne che contano per capire PERCHE' e' finita cosi'
-	print("  partita %d | giorno %2d | %-20s | pop %3d | avvicinamento %4.0f | colpi %4d | uccisi %3d | bruciati %3d | guardie %d (-%d) | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
-		_esiti.size(), GameState.giorno, causa, GameState.popolazione, Guardia.avvicinamento_minimo, GameState.colpi_sparati, GameState.zombie_uccisi, GameState.zombie_bruciati,
+	print("  partita %d | giorno %2d | %-20s | pop %3d | avvicinamento %4.0f | incastri %4d | uccisi %3d | bruciati %3d | guardie %d (-%d) | mura %3.0f%% | varchi giu' %d | morale %3.0f | $%4.0f | viveri %4.0f" % [
+		_esiti.size(), GameState.giorno, causa, GameState.popolazione, Guardia.avvicinamento_minimo, GameState.blocchi, GameState.zombie_uccisi, GameState.zombie_bruciati,
 		guardie, GameState.guardie_perse, GameState.sicurezza, varchi_caduti, GameState.morale, GameState.denaro, GameState.viveri])
 	_partita.queue_free()
 	_partita = null
@@ -87,6 +87,9 @@ func _riassunto() -> void:
 	var perse := 0
 	for e in _esiti:
 		perse += e["perse"]
+	print("  incastri per partita: %.1f  dove: %s" % [
+		float(_esiti.reduce(func(a, e): return a + e["blocchi"], 0)) / _esiti.size(),
+		GameState.blocchi_dove])
 	print("  guardie: %.1f vive alla fine, %.1f perse durante" % [
 		float(guardie) / _esiti.size(), float(perse) / _esiti.size()])
 	print("\n  Lettura: l'IA gioca a caso, quindi e' il pavimento del gioco.")

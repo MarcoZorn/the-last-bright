@@ -91,6 +91,14 @@ func _sblocca(delta: float) -> void:
 	_fermo_da += delta
 	if _fermo_da < 3.0:
 		return
+	# fermo da tre secondi e senza niente da mordere: e' un incastro vero, non
+	# un assedio. Contiamolo, cosi' si sa se il problema esiste e dove.
+	if _preda_a_portata() == null and mondo != null:
+		GameState.blocchi += 1
+		var ch := mondo.carattere(mondo.a_cella(global_position))
+		var meta := "senza-percorso" if _percorso.size() <= 1 else "con-percorso"
+		var chiave := "%s/%s" % [ch, meta]
+		GameState.blocchi_dove[chiave] = int(GameState.blocchi_dove.get(chiave, 0)) + 1
 	_fermo_da = 0.0
 	_ultima_posizione = global_position
 	_percorso.clear()
