@@ -95,6 +95,28 @@ godot --headless res://tools/test_guardia.tscn              # le difese ammazzan
 Kenney (kenney.nl), licenza CC0. Scaricati con `tools/fetch-assets.sh`.
 Sono placeholder: servono a leggere la mappa, non a essere l'aspetto finale.
 
+## La versione 3D (in costruzione)
+
+```bash
+godot --path . res://scenes3d/prova.tscn
+```
+
+Cammini dentro la piazza in terza persona: WASD, mouse per guardare, SHIFT per
+correre, ESC libera il puntatore.
+
+E' un **blockout**, non il gioco: volumi alle misure giuste, nessun modello.
+Serve a capire se il 3D funziona prima di spendere ore in modellazione.
+La geometria e' generata da `assets/map.txt`, la stessa del 2D: sposti un muro
+nel file di testo e si sposta in entrambe le versioni. Una casella = 3 metri,
+quindi la piazza fortificata e' 120x156 metri, misure reali.
+
+Viste di controllo, utili quando qualcosa non si vede:
+
+```bash
+godot --path . res://scenes3d/prova.tscn -- --dallalto   # la citta' a volo d'uccello
+godot --path . res://scenes3d/prova.tscn -- --terra      # camera fissa a livello d'uomo
+```
+
 ## Giocare in tre
 
 `O` ospita, `U` si unisce, porta 8910. Il movimento dei leader e' del client,
