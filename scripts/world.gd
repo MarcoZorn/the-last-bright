@@ -21,13 +21,15 @@ const TILES := {
 	"+": [0, Vector2i(4, 9)],   # porta / barricata
 	"C": [0, Vector2i(1, 4)],   # chiesa
 	"G": [0, Vector2i(5, 4)],   # governo
-	"A": [0, Vector2i(1, 6)],   # caserma
+	"M": [0, Vector2i(1, 6)],   # caserma
+	"A": [0, Vector2i(1, 8)],   # pilone fra le arcate del ponte
+	"T": [0, Vector2i(1, 9)],   # Torretta Valadier
 	"V": [1, Vector2i(6, 5)],   # blocco veicolare
 	"t": [0, Vector2i(4, 0)],   # albero
 	"o": [0, Vector2i(10, 8)],  # barile
 	"x": [0, Vector2i(9, 3)],   # sacchi di sabbia
 }
-const BLOCCANTI := "~#CGAVtox"
+const BLOCCANTI := "~#CGMATVtox"
 
 ## Le nove facce del muro di cinta nell'atlante tiny-town: e' un blocco 3x3,
 ## angoli sugli spigoli e lati sui bordi.
@@ -75,7 +77,7 @@ func _ready() -> void:
 	_prepara_astar()
 	varchi = _raggruppa(porte)
 	_calcola_mura()
-	for ch in ["C", "G", "A"]:
+	for ch in ["C", "G", "M"]:
 		edifici[ch] = _celle_con(ch)
 
 func carattere(c: Vector2i) -> String:

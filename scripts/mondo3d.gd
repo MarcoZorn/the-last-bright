@@ -28,7 +28,10 @@ const ALTI := {
 	"+": [1.2, Color(0.42, 0.31, 0.20)],           # barricata: bassa, si scavalca con lo sguardo
 	"C": [ALTEZZA_EDIFICIO * 1.4, Color(0.62, 0.60, 0.56)],
 	"G": [ALTEZZA_EDIFICIO, Color(0.60, 0.36, 0.32)],
-	"A": [ALTEZZA_EDIFICIO * 0.8, Color(0.45, 0.38, 0.30)],
+	"M": [ALTEZZA_EDIFICIO * 0.8, Color(0.45, 0.38, 0.30)],
+	# il tufo di Ponte Milvio: piloni e Torretta nello stesso materiale
+	"A": [9.0, Color(0.68, 0.63, 0.52)],
+	"T": [17.0, Color(0.72, 0.67, 0.56)],
 	"t": [4.0, Color(0.20, 0.34, 0.18)],
 	"o": [1.0, Color(0.44, 0.32, 0.22)],
 	"x": [1.0, Color(0.50, 0.46, 0.34)],

@@ -4,7 +4,7 @@ class_name Edificio
 ## ci puntano, e se crolla la citta' lo sente. E' il motivo per cui vale la pena
 ## difendere un lato delle mura piuttosto che un altro.
 
-const NOMI := {"C": "Chiesa", "G": "Palazzo", "A": "Caserma"}
+const NOMI := {"C": "Chiesa", "G": "Palazzo", "M": "Caserma"}
 
 var mondo: World
 var celle: Array[Vector2i] = []
