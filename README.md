@@ -1,5 +1,8 @@
 # The Last Bright
 
+> **In English:** a top-down 2D prototype for an asymmetric multiplayer game. A fortified square (think Rome's Ponte Milvio) during a zombie apocalypse, run by three factions (Church, Government, Army) who must cooperate against the outside while fighting each other for power inside. Power is zero-sum: at dawn the faction that delivered results gains legitimacy and takes it from the others; drop too low and you are deposed, becoming a rebel with your own sabotage actions. Survive 10 nights to win. Built in Godot 4; the 2D is a step, not the goal, used to prove the mechanics before going 3D. One interesting detail: the zombies never chase anyone, they path to the square's centre with A*, so until a barricade falls there is no route and they pile onto the nearest one; the siege emerges from the map rather than being scripted. Exports to a single-file Linux/Windows binary and to the web. The rest of this README is in Italian.
+
+
 Prototipo 2D top-down di un gioco multiplayer asimmetrico: una piazza fortificata
 tipo Ponte Milvio durante un'apocalisse zombie, governata da tre fazioni
 (Chiesa, Governo, Esercito) che devono collaborare contro l'esterno e si
