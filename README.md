@@ -189,3 +189,7 @@ Per metterlo online, in ordine di comodita':
 
 > `build/` non e' versionato: sono ~220 MB di roba rigenerabile con un comando.
 > macOS non c'e': l'export fallisce senza un Mac su cui firmarlo, e nessuno di noi ne ha uno.
+
+## License
+
+Code: [MIT](LICENSE) © Marco Zorn. Art and audio in `assets/kenney/` are by Kenney (CC0), see the License.txt in each pack.
